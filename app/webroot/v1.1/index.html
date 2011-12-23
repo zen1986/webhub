@@ -1,0 +1,41 @@
+<html>
+	<head>
+        <script type="text/javascript" src="./include/d3/d3.js"></script>
+        <script type="text/javascript" src="./include/d3/d3.layout.js"></script>
+		<script type="text/javascript" src="./graph_plotter.js"></script>
+		<script type="text/javascript" src="./include/date.format.js"></script>
+		<script type="text/javascript" src="./data_processor.js"></script>
+		<script type="text/javascript" src="./include/config.js"></script>
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<style type="text/css">
+		.axis {
+			shape-rendering:crispEdges;
+		}
+		.axis path, .axis line {
+			fill:none;
+			stroke: #000;
+		}
+		.selected_bar>rect.bar_background {
+			fill:red;
+			opacity:0.2;
+		}
+        </style>
+	</head>
+	<body>
+		<div class="loading"></div>
+		<div id="drawing_div"></div>
+		<script>
+			var time_by_domain = ['hour', 'day', 'week', 'month'];
+			var time_by = 'day';
+			var block_by = 'companyId';
+			var p = new DataProcessor(time_by, time_by_domain, block_by);
+			var input = p.get('test/data/valid.txt');
+			var output = p.process(input);
+			
+			var plotter = new SGPlotter();
+			plotter.setData(output);
+			plotter.draw();
+		</script>
+	</body>
+</html>
+

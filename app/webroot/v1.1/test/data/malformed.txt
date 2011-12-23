@@ -1,0 +1,3 @@
+{"info"	: [{"name": "starhub", "cid": 2}],
+				"fields": ["cid", "time", "sdd\sf"],
+				"raw"	: [[2,3,8]]}
