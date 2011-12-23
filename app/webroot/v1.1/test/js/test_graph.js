@@ -3,6 +3,7 @@
 // check for certain property
 // generate events to check for scroll functions
 
+
 function TestSuitStackGraph (title, path, time_by_domain, block_by) {
 	// setup graph
 	this.time_by = time_by_domain[1];
@@ -10,6 +11,12 @@ function TestSuitStackGraph (title, path, time_by_domain, block_by) {
 	var p = new DataProcessor(this.time_by, time_by_domain, block_by);
 	var input = p.get(path);
 	this.output = p.process(input);
+
+	if (!(new DataLoader().validateProcessed(this.output, input,this.time_by, time_by_domain, block_by))) {
+		console.log("Invalid Data");
+		alert("Invalid Data");
+		return false;
+	}	
 
 	this.plotter = new SGPlotter();
 	this.plotter.setData(this.output);
@@ -233,26 +240,35 @@ TestSuitStackGraph.prototype = {
 	},
 
 	// all blocks are drawn with correct color
-	"gr_dr_bk2": function () {
+	"blocks_colors_correspond_to_legend_expected_true": function () {
 	},
 
 	// average line is always associated with correct average value for bar and lines
-	"gr_calc1": function () {
+	"average_bar_has_correct_value_expected_true": function () {
 	},
 
-	// line values is correct with the given bar
-	"gr_calc2": function () {
+	"average_line_has_correct_value_expected_true": function () {
+	},
+
+	// line values is correct for all bars
+	"line_value_is_correct_expected_true": function () {
+
 	},
 
 	// more than 90% of the graph height are covered with items
-	"gr_gen1": function () {
+	"graph_height_has_over_90%_coverage_expected_true": function () {
+		// check highest bar 
+		// should be taller than 90%
 	},
 
 	// popup will be shown correctly
-	"gr_pop1": function () {
+	"popup_shown_correct_expected_true": function () {
 	},
 
 	// popup show correct date
-	"gr_pop2": function () {
+	"popup_show_correct_date_expected_true": function () {
+		// randomly choose a bar
+		// trigger an dblclick event
+		// check the date element
 	}
 }
