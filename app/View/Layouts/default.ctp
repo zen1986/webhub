@@ -1,5 +1,17 @@
-<?php
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-echo $content_for_layout;
+	<title>zvaya</title>
+	
+</head>
+<body>
+	<?php
 
-?>
+	echo $content_for_layout;
+
+	?>
+</body>
+</html>
+

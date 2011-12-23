@@ -5,7 +5,7 @@
 
 function TestSuitStackGraph (title, path, time_by_domain, block_by) {
 	// setup graph
-	this.time_by = time_by_domain[3];
+	this.time_by = time_by_domain[1];
 	this.time_by_domain = time_by_domain;
 	var p = new DataProcessor(this.time_by, time_by_domain, block_by);
 	var input = p.get(path);
