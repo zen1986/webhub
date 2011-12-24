@@ -4,7 +4,7 @@ class PostsController extends AppController {
 	var $components=array('Auth', 'Session');
 	var $layout = 'loggedin';
 	var $helpers = array('Session', 'Form', 'Time');
-	var $uses = array('User', 'Post');
+	var $uses = array('User', 'Post', 'Tag');
 
 	public function beforeFilter() {
 		//$this->Auth->loginRedirect(array('controller'=>'Post', 'action'=>'index'));
@@ -26,6 +26,7 @@ class PostsController extends AppController {
 	}
 
 	public function create() {
+		$this->set('tags', $this->Tag->find('all'));
 		if ($this->request->is('post')) {
 			$this->request->data['Post']['user_id'] = $this->Session->read('Auth.User.id');
 			if ($this->Post->save($this->request->data)) {

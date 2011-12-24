@@ -40,7 +40,7 @@ div.post_action a {
 	text-decoration: none;
 }
 
-#menu, #submenu, .message {
+#menu, .message {
 	width: 82%;
 	height: 40px;
 	line-height: 200%;
@@ -49,15 +49,20 @@ div.post_action a {
 	margin-bottom: 10px;
 	border: solid 1px rosyBrown;
 }
+#submenu {
+	position: fixed;
+	background-color: #dbdb8d;
+	left: 10px;
+	padding: 10px;
+}
 
 #menu {
 	background-color: lightblue;
 }
 #submenu {
-	background-color: #dbdb8d;
 }
 
-div.menu_item, div.submenu_item {
+div.menu_item {
 	position:relative;
 	float: left;
 	margin-left: 10px;

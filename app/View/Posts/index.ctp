@@ -7,7 +7,6 @@ if ($this->Session->read('Auth.User')) {
 	);
 	echo $this->element('sub_menu', array('menus'=>$menus));
 }
-echo "<div id='content'>";
 
 foreach ($posts as $post) {
 	echo "<div class='post'>";
@@ -35,5 +34,4 @@ foreach ($posts as $post) {
 	echo "</div>";
 	echo "</div>";
 }
-echo "</div>";
 ?>

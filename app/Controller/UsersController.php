@@ -20,7 +20,7 @@ class UsersController extends AppController {
 
 			if ($password == sha1($pass)) {
 				$this->Auth->login($entry['User']);
-				$this->redirect(FULL_BASE_URL.$this->Session->read('redirectURL'));
+				$this->redirect($this->Session->read('redirectURL'));
 			} else {
 				$this->Session->setFlash(__('Username or password is incorrect'), 'default', array(), 'auth');
 			}

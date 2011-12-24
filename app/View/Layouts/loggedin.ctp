@@ -13,7 +13,9 @@
 			<div id="middle">
 <?php echo $this->Session->flash('auth');?>
 <?php echo $this->Session->flash();?>
+			<div id="content">
 				<?php echo $content_for_layout;?>
+			</div>
 			</div>
 			<div id="bottom">
 			</div>
