@@ -9,29 +9,7 @@ if ($this->Session->read('Auth.User')) {
 }
 
 foreach ($posts as $post) {
-	echo "<div class='post'>";
-	echo "<div class='post_title'>";
-	echo $post['title'];
-	echo "</div>";
-	echo "<div class='post_body'>";
-	echo nl2br($post['body']);
-	echo "</div>";
-	echo "<div class='post_signature'>";
-	echo "<div>";
-	echo 'Last modified on: '. $this->Time->nice($post['modified']);
-	echo "</div>";
-	if ($this->Session->read('Auth.User')) {
-		echo "<div class='post_actions'>";
-		echo "<div class='post_action'>";
-		echo $this->Html->link('edit', array('action'=>'edit', $post['id']));
-		echo "</div>";
-		echo "<div class='post_action'>";
-		echo $this->Html->link('delete', array('action'=>'delete', $post['id']));
-		echo "</div>";
-		echo "</div>";
-	}
-	
-	echo "</div>";
-	echo "</div>";
+	$tags = $post['Posttag'];
+	echo $this->Element('display_post', array('post'=>$post['Post'], 'tags'=>$tags));
 }
 ?>

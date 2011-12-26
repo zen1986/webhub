@@ -4,3 +4,25 @@ div.message {
 #authMessage {
 	background-color: red;
 }
+
+div.quote {
+	background-color: #EEE;
+	font-style: italic;
+	padding: 10px;
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+span.tagname {
+	text-transform: capitalize;
+}
+
+span.tagname a {
+	text-decoration: none;
+	color: #666;
+}
+
+div.post_title a {
+	text-decoration: none;
+	color: #666;
+}

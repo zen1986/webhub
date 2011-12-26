@@ -1,6 +1,4 @@
 <?php
-
-
 class TagsController extends AppController {
 	var $layout = "loggedin";
 	var $components = array('Auth');
@@ -24,16 +22,10 @@ class TagsController extends AppController {
 	}
 
 	public function create() {
-		if ($this->request->is('post')) {
-			if ($this->Tag->save($this->request->data)) {
-				$this->Session->setFlash('Tag created');
-				$this->redirect(array('action'=>'index'));
-			} else {
-				$this->Session->setFlash('Unable to create Tag');
-				$this->redirect(array('action'=>'index'));
-			}
-		}
 
+	}
+	public function tagName($id) {
+		return $this->Tag->read('tagname', $id);
 	}
 }
 
