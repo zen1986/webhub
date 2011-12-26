@@ -1,7 +1,5 @@
 <?php
 class UsersController extends AppController {
-	var $helpers = array('Form');
-	var $components = array('Session', 'Auth');
 	var $layout = 'loggedin';
 
 	public function beforeFilter() {
@@ -20,7 +18,7 @@ class UsersController extends AppController {
 
 			if ($password == sha1($pass)) {
 				$this->Auth->login($entry['User']);
-				$this->redirect($this->Session->read('redirectURL'));
+				$this->redirect('/pages/home');
 			} else {
 				$this->Session->setFlash(__('Username or password is incorrect'), 'default', array(), 'auth');
 			}

@@ -33,7 +33,10 @@ App::uses('Controller', 'Controller');
  * @link http://book.cakephp.org/view/957/The-App-Controller
  */
 class AppController extends Controller {
-
+	var $components = array('Session', 'Auth');
+	var $helpers = array('Html', 'Session', 'Form', 'Time');
+	
 	function beforeFilter() {
+		$this->Auth->allow('*');
 	}
 }

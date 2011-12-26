@@ -1,15 +1,14 @@
 <?php
 
 class PostsController extends AppController {
-	var $components=array('Auth', 'Session');
 	var $layout = 'loggedin';
-	var $helpers = array('Session', 'Form', 'Time');
 	var $uses = array('User', 'Post', 'Tag', 'Posttag');
 
 	public function beforeFilter() {
-		//$this->Auth->loginRedirect(array('controller'=>'Post', 'action'=>'index'));
-		$this->Auth->allow(array('index', 'view'));
+		$this->Auth->loginRedirect=array('controller'=>'Post', 'action'=>'index');
+		$this->Auth->allow('index', 'view', 'posttag');
 	}
+	
 	public function index() {
 		$id = $this->Session->read('Auth.User.id');
 		$posts = array();
