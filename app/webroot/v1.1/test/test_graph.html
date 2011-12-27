@@ -34,9 +34,25 @@
 			var time_by_domain = ['hour', 'day', 'week', 'month'];
 			var block_by = 'companyId';
 
+
+
 			var t = new TestSuitStackGraph('test for graph', 'data/valid_raw.txt', time_by_domain, block_by);
-			// run test with delayed return
-			runTestWithInterval(t, $("#test_result"));
+
+			// drag test
+			var pages = t.plotter.separators.length +2;
+			
+			//pages =1;
+			var time = 2000;
+			var timer = setInterval(dragTest, time);
+			setTimeout(function () {clearTimeout(timer);}, time*pages);
+
+			function dragTest() {
+				$('#test_result').empty();
+				// select a bar
+				$("g.bar:last").trigger("click");
+				runTest(t, $("#test_result"));
+			}
+
 	</script>
 
 	</body>

@@ -17,26 +17,6 @@ function runTest(suit, test_div) {
 	}
 }
 
-// with set interval
-// the sequence of test cannot be set here
-// just trigger the first time
-// let the function itself decide which subsequent function to run
-function runTestWithInterval(suit, test_div) {
-	test_div.append('<h3>'+suit.title+'</h3>');
-	var method;
-	var first;
-	for (method in suit) {
-		if (typeof suit[method] == "function") {
-			var	out = "<div class='test "+method+"'>"+ method+" <div class='result fail'>failed</div></div>";
-			test_div.append(out);
-			if (first==undefined) {
-				first=method;
-			} 
-		}
-	}
-	suit[first]();
-}
-
 
 function deepCopyBars(bars) {
 	var ret=[];
@@ -64,3 +44,4 @@ function deepCopyBars(bars) {
 	}
 	return ret;
 }
+

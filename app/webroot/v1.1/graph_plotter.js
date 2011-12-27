@@ -160,7 +160,7 @@ SGPlotter.prototype = {
         
         // Setup animation
         // Allow the arrow keys to change the displayed.
-        $('body').keydown(function(e) {
+        $(document).keydown(function(e) {
             var dir='';
             switch (e.keyCode) {
                 case 37: // left
@@ -223,16 +223,23 @@ SGPlotter.prototype = {
         .data(data, function (d) {return d.time;}).enter().append('svg:g')
         .attr('class', 'bar')
         .attr('id', function (d) {return "bar_"+d.time;})
-        .on('dblclick', function (d) {self.popup(d, self);})
-		.on('click', function (d) {
-			self.selected_bar = d;
+		.attr('time', function (d) {return d.time;})
+        .attr('transform', function (d,i) {return 'translate('+((config.bar_margin+self.bar_width)*(i+self.container_pos))+', 0)';});
+
+		// use jQuery's method to register event, easy for testing
+		$('g.bar').on('dblclick', function () {
+			var data = d3.select(this)[0][0].__data__;	
+			self.popup(data, self);
+		});
+
+		$('g.bar').on('click', function () {
+			self.selected_bar = d3.select(this)[0][0].__data__;
 			self.drawAverageLine();
 			// remove previous assigned
 			d3.select('.selected_bar').classed('selected_bar', false);
 			// add new class to currectly selected
 			d3.select(this).classed('selected_bar', true);
 		})
-        .attr('transform', function (d,i) {return 'translate('+((config.bar_margin+self.bar_width)*(i+self.container_pos))+', 0)';})
         
 		// attach rect to bar groups
         bars.append('svg:rect')
@@ -304,6 +311,7 @@ SGPlotter.prototype = {
 	 *		it has has left and right buffer which is of width equal to screen size
 	 * */
     'updateContainer': function (dir) {
+		// positional index
         var screen_pos = ~~(this.screen_x/(this.bar_width+config.bar_margin));
         
         if (screen_pos-this.container_pos<0) screen_pos_in_container=0;
@@ -383,7 +391,7 @@ SGPlotter.prototype = {
 		var idx_of_line = this.fields.indexOf(config.line_by);
 
 		// line_coord 
-        var line_coord = d3.scale.linear().range([0,config.chart_height]).domain([0,d3.max(this.data, function (d) {return line_value(d, idx_of_line);})]);
+        var line_coord = d3.scale.linear().range([0,config.chart_height]).domain([0,d3.max(this.data, function (d) {return lineValue(d, idx_of_line);})]);
 
         var past_tense = config.line_by+'d';
         if (config.line_by=='collection') past_tense = 'collected';
@@ -392,7 +400,8 @@ SGPlotter.prototype = {
 		// get positions of current data
         var line = d3.svg.line().interpolate('linear');
         for (var i=0;i<data.length;i++) {
-            var p = [(config.bar_margin+this.bar_width)*(i+self.container_pos)+(config.bar_margin+this.bar_width)/2,line_coord(line_value(data[i],idx_of_line)).toFixed(2)];
+			var line_val = lineValue(data[i],idx_of_line);
+            var p = [(config.bar_margin+this.bar_width)*(i+self.container_pos)+(config.bar_margin+this.bar_width)/2,line_coord(line_val).toFixed(2), line_val, data[i]];
             pos.push(p)
         }
 		// append lines
@@ -419,7 +428,7 @@ SGPlotter.prototype = {
         .attr('fill', config.line_color)
         .append('svg:title')
         .text(function (d, i) {
-            return "Points "+past_tense+" :"+line_value(self.data[self.container_pos+i],idx_of_line).toFixed(0);
+            return "Points "+past_tense+" :"+lineValue(self.data[self.container_pos+i],idx_of_line).toFixed(0);
         });
                 
 
@@ -487,7 +496,7 @@ SGPlotter.prototype = {
         .attr('fill', config.background_color)
         		
 		var idx_of_line = this.fields.indexOf(config.line_by);
-        var line_coord = d3.scale.linear().range([config.chart_height, 0]).domain([0,d3.max(this.data, function (d) {return line_value(d,idx_of_line);})]);
+        var line_coord = d3.scale.linear().range([config.chart_height, 0]).domain([0,d3.max(this.data, function (d) {return lineValue(d,idx_of_line);})]);
 		var y2Axis = d3.svg.axis().scale(line_coord).orient('right');
 		d3.select('g.right_region').append('svg:g').attr('class', 'y2 axis').attr('transform', 'translate(0, '+config.pad[0]+')').call(y2Axis); 
 		d3.select('.y2.axis').selectAll('*').attr('fill', config.line_color);
@@ -542,6 +551,7 @@ SGPlotter.prototype = {
         })
 			
         l.append('svg:rect').attr('fill', function (d) {return color(d);} ).attr('width', bw).attr('height', bh)
+		.attr('level', function (d) {return d;});
 			
         var self=this;
         l.append('svg:text')
@@ -678,14 +688,15 @@ SGPlotter.prototype = {
  	      
 		self.popup_y = 0;
 		self.popup_scrollable_height = blocks.length*bar_width - config.chart_height-config.pad[2]+10;
-		var popup_canvas = d3.select('svg').append('svg:g').attr('class', 'popup');
+		var popup_canvas = d3.select('svg').append('svg:g').attr('class', 'popup').attr('time', bar.time);
 	
         popup_canvas.append('svg:rect')
         .attr('width', config.svg_width-config.pad[1]+config.pad[3]-20)
         .attr('height', config.svg_height)
 		.attr('fill', config.popup_background)
-		.attr('opacity', 0.9)
-        .on('click', function () {
+		.attr('opacity', 0.9);
+        
+		$('g.popup').on('click', function () {
 			d3.selectAll('.popup').remove();
 		});
 		// popup title
@@ -790,8 +801,15 @@ SGPlotter.prototype = {
     'drawAverageLine': function () {
 		var range = getAverageRange(config.average_line_by, this.selected_bar, this.data);
 		
+		this.average_range = range;
 		var bar_sum = d3.sum(range, function (d) {return d.count});
 		var bar_average = bar_sum/range.length;
+		
+		var idx_of_line = this.fields.indexOf(config.line_by);
+		var line_sum = d3.sum(range, function (d) {return lineValue(d, idx_of_line);});
+		var line_average = line_sum/range.length;
+		this.bar_average = bar_average;
+		this.line_average = line_average;
 
 		if (config.show_bar) {
 			d3.select('.bar_average').remove();
@@ -808,9 +826,6 @@ SGPlotter.prototype = {
 		}
 		if (config.show_line) {
         	// draw average line for lines
-			var idx_of_line = this.fields.indexOf(config.line_by);
-			var line_sum = d3.sum(range, function (d) {return line_value(d, idx_of_line);});
-			var line_average = line_sum/range.length;
         	var line_pos = this.line_coord(line_average.toFixed(1));
 
 			d3.select('.line_average').remove();
@@ -845,12 +860,12 @@ function loading() {
 }
 
 /*
- * N: line_value
+ * N: lineValue 
  * A: bar, d3 bar object; idx_of_line, index of fields to show 
  * D: sum the line value of all entries on each bar 
  * R: return the sum
  * */
-function line_value(bar,idx_of_line) {
+function lineValue(bar,idx_of_line) {
 	var sum=0;
 	for (var i=0;i<bar.blocks.length;i++) {
 		sum+=d3.sum(bar.blocks[i].entries, function (d) {return d[idx_of_line];});
@@ -929,16 +944,16 @@ function getAverageRange (by, selected_bar, data) {
 			from = upto - 24;
 			break; 
 		case 'ow': 
-			from = upto - 24*7; // past 6 days plus today
+			from = upto - 24*7; // past 1 week 
 				break;
 		case 'om':
-			from = upto - 24*30; // past 29 days plus today
+			from = upto - 24*30; // past 1 month 
 			break;
 		case 'tm':
-			from = upto - 24*90; // past 89 days plus today
+			from = upto - 24*90; // past 3 month
 			break;
 		case 'oy':
-			from = upto - 24*365; // past 364 days plus today
+			from = upto - 24*365; // past 1 year 
 			break;
 		default:
 			upto = ~~(new Date().getTime()/3600/1000);
