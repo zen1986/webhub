@@ -1,4 +1,3 @@
-<div id="top_content">
 	<div class="left">
 		<a href="index.php"><img src="img/logo_index.png" id="logo" /></a>
 	</div>
@@ -11,4 +10,3 @@
 			</div>
 		</div>
 	</div>
-</div>

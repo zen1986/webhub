@@ -1,46 +1,53 @@
-body {
-	padding:0px;
-	margin: 0px;
-	background-color: #282828;
+html {
+	background: #282828;
 }
 
-#background {
+#background, #background_upper, #background_lower {
 	position: absolute;
 	left: 0px;
-	top: 0px;
 	width: 100%;
-	height: 500px; 
-	margin: 0px;
-	padding: 0px;
 	z-index: -1000;
-	background-color: #D0D0D0;
+}
+#background {
+	height: 500px; 
+	top: 0px;
+	background-image: -webkit-gradient(linear, 0% 0%, 0% 90%, from(#fff), to(#999));
+}
+
+#background_upper {
+	top: 0px;
+	height: 150px; 
+	background-image: -webkit-gradient(linear, 0% 0%, 0% 90%, from(#fff), to(#999));
+}
+
+#background_lower {
+	top: 150px;
+	height: 500px; 
+	background-color: white;
 }
 
 #center {
-	top: 0px;
-	width: 855px;
+	width: 900px;
 	margin-left:auto;
 	margin-right:auto;
 }
 
-#top_content {
+#center>div {
 	position: relative;
-	height: 90px;
 	width: 100%;
-	overflow: hidden;
-}
-
-#middle_content {
-	width: 855px;
-}
-
-#bottom_content {
 }
 
 /*
  * top_content 
  *
  * */
+
+#top_content {
+	height: 90px;
+	overflow: hidden;
+}
+
+
 #top_content div.left, #top_content div.right  {
 	width: 50%;
 	height: 100%;
@@ -89,23 +96,22 @@ body {
 	top: 10px;
 	line-height: 1.4em;
 	width: 240px;
-	border-width: 0px;
 	-webkit-box-shadow: 0 0 1px rgba(0,0,0,1);
 }
 
-#search_box input:focus {
-}
 
 /*
  * middle content
  *
  * */
 
+#middle_content {
+	height: 820px;
+}
+
 #menu{
 	position: absolute;
 	height: 60px;
-	margin-left: auto;
-	margin-right: auto;
 }
 
 div.menu_item {
@@ -118,7 +124,6 @@ div.menu_item {
 div.menu_text {
 	text-align: center;
 	border-style: none;
-	border-width: 0px;
 	width: 100%;
 	position: absolute;
 	top: 20px;
@@ -129,20 +134,80 @@ img.menu_dot {
 	right: 0px;
 }
 
-div.menu_text a {
+#app_demo {
+	position: absolute;
+	top: 446px;
+	left: -30px;
+	width: 910px;
+	height: 354px; 
+}
+
+#app_demo img {
+	margin: 0px;
+	padding: 0px;
+	display: block;
+}
+
+#demo_area {
+	position: absolute;
+	left: 100px;
+	top: 5px;
+	width: 720px;
+	height: 354px;
+	overflow: hidden;
+}
+div.demo_step {
+	position: absolute;
+	width: 240px;
+}
+#demo_area div.demo_step img {
 	margin-left: auto;
 	margin-right: auto;
 }
+div.step_1 {
+	left:0px; 
+}
+div.step_2 {
+	left:240px; 
+}
+div.step_3 {
+	left:480px; 
+}
 
+#demo_area img.demo_step_instruction {
+	margin-bottom: 3px;
+}
+
+#demo_area img.demo_step_numb {
+	position: absolute;
+	bottom: 2px;
+	left: 0px;
+}
+.demo_nav_left, .demo_nav_right {
+	top: 140px;
+}
+
+.demo_nav_left {
+	position: absolute;
+}
+
+.demo_nav_right{
+	position: absolute;
+	right: 0px;
+}
 /**
  * bottom content
  *
  */
+
+#bottom_content {
+	height: 100px;
+}
+
 #bottom_content div {
-	margin-top: 10px;
 	width: 50%;
 	float: left;
-	text-align: center;
+	line-height: 2em;
 	font-size: 0.8em;
 	color: white;
 	font-family: "Arial"; 
@@ -152,4 +217,3 @@ div.menu_text a {
 	color: #99FF00;
 	text-decoration: none;
 }
-
