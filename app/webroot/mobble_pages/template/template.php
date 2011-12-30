@@ -12,10 +12,10 @@
 <body>
 	<div id="center">
 		<div id="top_content">
-			<?php include "include/banner.php";?>
+			<?php include "element/banner.php";?>
 		</div>
 		<div id="middle_content">
-			<?php include "include/menu.php";?>	
+			<?php include "element/menu.php";?>	
 			<div id="content-image">
 				<img border="0" src=<?php echo $content_image;?> usemap="#content_map"/>
 				<?php if ($page == "index"): ?>
@@ -32,7 +32,7 @@
 			<?php endif;?>
 		</div>
 		<div id="bottom_content">
-			<?php include "include/footer.php";?>	
+			<?php include "element/footer.php";?>	
 		</div>
 	</div>
 	<?php if ($page == "index"): ?>

@@ -1,6 +1,6 @@
 <ul id="menu">
 	<li class="menu_item home">
-		<a href="home.php" > Home </a>
+		<a href="home.php" >Home </a>
 		<a class="mask" href="home.php" > Home </a>
 		<img class="menu_dot" src="img/menu_dot.png"/>
 	</li>		

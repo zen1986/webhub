@@ -30,7 +30,7 @@
 			var time_by = 'day';
 			var block_by = 'companyId';
 			var p = new DataProcessor(time_by, time_by_domain, block_by);
-			var input = p.get('test/data/valid_raw.txt');
+			var input = p.get('data.txt');
 			var output = p.process(input);
 			
 			var plotter = new SGPlotter();

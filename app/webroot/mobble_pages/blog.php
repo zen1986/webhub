@@ -8,7 +8,7 @@ $scripts = "
 	$('#menu li.blog').addClass('highlighted');
 	";
 
-include "template.php";
+include "template/template.php";
 
 ?>
 

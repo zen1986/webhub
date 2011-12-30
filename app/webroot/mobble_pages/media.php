@@ -7,7 +7,7 @@ $scripts = "
 	$('#menu li').removeClass('highlighted');
 	$('#menu li.media').addClass('highlighted');
 	";
-include "template.php";
+include "template/template.php";
 
 ?>
 
