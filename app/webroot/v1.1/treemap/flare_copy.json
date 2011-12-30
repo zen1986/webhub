@@ -1,0 +1,33 @@
+{
+ "name": "flare",
+ "children": [
+  {
+   "name": "7-eleven",
+   "children": [
+    {"name": "redeem", "size": 125},
+    {"name": "collect", "size": 125}
+   ]
+  },
+  {
+   "name": "starbucks",
+   "children": [
+    {"name": "collect", "size": 25},
+    {"name": "redeem", "size": 145}
+   ]
+  },
+  {
+   "name": "cheers",
+   "children": [
+    {"name": "collect", "size": 50},
+    {"name": "redeem", "size": 87}
+   ]
+  },
+  {
+   "name": "challengers",
+   "children": [
+    {"name": "collect", "size": 12},
+    {"name": "redeem", "size": 150}
+   ]
+  }
+]
+}

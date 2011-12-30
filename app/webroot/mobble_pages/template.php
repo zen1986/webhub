@@ -41,5 +41,8 @@
 		<div id="background_upper"></div>
 		<div id="background_lower"></div>
 	<?php endif;?>
+	<script>
+		<?php if (isset($scripts)) echo $scripts;?>
+	</script>
 </body>
 </html>

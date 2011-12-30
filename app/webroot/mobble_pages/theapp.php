@@ -27,6 +27,10 @@ $out.="<a href='#' class='demo_nav_right' onclick='goRight();return false;'><img
 $out.="<script src='js/app_demo.js'></script>";
 $app_demo = $out;
 
+$scripts = "
+	$('#menu li').removeClass('highlighted');
+	$('#menu li.theapp').addClass('highlighted');
+	";
 include "template.php";
 ?>
 

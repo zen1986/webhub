@@ -2,8 +2,9 @@
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
 		<title>Treemap</title>
-		<script type="text/javascript" charset="utf-8" src="../../d3/d3.js"></script>
-		<script type="text/javascript" charset="utf-8" src="../../d3/d3.layout.js"></script>
+		<script type="text/javascript" charset="utf-8" src="../include/d3/d3.js"></script>
+		<script type="text/javascript" charset="utf-8" src="../include/d3/d3.layout.js"></script>
+		<script type="text/javascript" charset="utf-8" src="./colors.js"></script>
 		<style type="text/css" media="screen">
 		.cell {
 			border: solid 1px white;
@@ -44,14 +45,15 @@
 			.style("width", w + "px")
 			.style("height", h + "px");
 		
-		d3.json("./flare.json", function(json) {
+		d3.json("./flare_copy.json", function(json) {
 		div.data([json]).selectAll("div")
 			.data(treemap.nodes)
 			.enter().append("div")
 			.attr("class", "cell")
-			.style("background", function(d, i) { var c = d.children ? color(d.name) : null; console.log(c+" "+d.name+" "+i); return c; })
+			.style("background", function(d, i) {return theColors[d.name];}) //var c = d.children ? color(d.name) : null; console.log(c+" "+d.name+" "+i); return c; })
 			.call(cell)
-			.text(function(d) { return d.children ? null : d.name; });
+			.text(function(d) { return d.children ? null : d.parent.name; })
+			.append('title').text(function(d) { return d.children ? null : d.parent.name; });
 		
 		d3.select("#size").on("click", function() {
 			div.selectAll("div")
