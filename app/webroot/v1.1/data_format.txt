@@ -1,0 +1,68 @@
+JSON object - for plotting graph of No. of checkins and No. of points [redeem/collect] per [time period]
+
+Raw Data
+
+example: 
+{
+ "info": [
+		{"name": "7-eleven", "storeId": 1, "companyId": 1, ¡°region¡±: ¡°south¡±}, 
+		{"name": "s-11", "storeId": 1, "companyId": 21, ¡°region¡±: ¡°north¡±}
+	],
+ "fields": ["personId", "storeId", "companyId", "time", "redemption", "collection"],
+ "raw": [
+		[0, 0, 1, 367665, 140, 0], 
+		[1, 0, 21, 367443, 0, 20],
+		[1, 0, 1, 367471, 118, 0], 
+		[1, 0, 1, 367496, 199, 0], 
+		[1, 0, 21, 367497, 0, 20], 
+		[1, 0, 1, 367760, 28, 0]
+	]
+}
+
+
+explanation: 
+{
+¡®info¡¯: [ company info object, ... ],
+¡®fields¡¯: [ field name, ... ],                        
+¡®raw¡¯: [ [ entry ], ... ]
+}
+
+info : its value is an array of company info object 
+company info object : It acts as background information for raw entries. Each entry is linked to one info object by an ID. This ID must be the one and only one value shared by info keys and fields values. 
+field name: an array of string.  It must have one and only one value matching one of the info object keys.
+raw: an array of entry
+entry : each data in entry will be interpreted corresponding to the field name.  the ¡®time¡¯ field store the timestamp in unit of hour. everything is integer.  
+
+variable: bar_by_domain , eg. [¡®hour¡¯, ¡®day¡¯, ¡®week¡¯, ¡®month¡¯]
+variable: bar_by = one of bar_by_domain
+variable: block_by = one of company info object key, eg, region
+
+
+Processed data format
+
+Separate raw data entries into bar objects according to bar_by (also sort the bar by bar_by).
+Entries in bar are grouped by block_by to blocks.
+
+data_for_drawing = {
+	¡®bars¡¯: [ bar_object, ... ],
+	¡®fields¡¯: [ field name, ¡­],                     // field name same as the above
+	¡®info¡¯: [ company info object],               // company info object same as the above
+	¡®bar_by¡¯: bar_by,
+	¡®bar_by_domain¡¯: [ ]                            
+	¡®block_by¡¯: block_by,
+}
+
+bar_object = {
+	¡®blocks¡¯:[ block_object, ...],
+	¡®count¡¯: no. of entries
+	¡®levels¡¯: no. of blocks
+	¡®time_by¡¯: bar_by value
+¡®time¡¯: timestamp in hours, this should match the label when converted to string
+}
+
+block_object = {
+	¡®block_by¡¯: block_by value,
+¡®entries¡¯:  [entry, ...]
+}
+
+test case analysis

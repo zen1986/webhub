@@ -1,0 +1,6 @@
+graphing
+  - footfall, total/unique, background marked with activities
+  - frequency of visit, by week or by month
+  - activities, treemap
+  - pdf generation
+  - ad views, ad is identified by text
