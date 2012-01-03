@@ -58,54 +58,41 @@ DataLoader.prototype = {
 			}
 		}
 
-		// check fields
-		var fields = data['fields'];
-		var block_by_idx = fields.indexOf(block_by);
-		
-		// must have block_by
-		if (block_by_idx == -1) {
-			console.error("validateRaw: block_by is absent in fields ");
-			return false;
-		}
-		// must have 'time'
-		if (fields.indexOf('time')==-1) {
-				console.error("validateRaw: time is absent in fields ");
-			return false;
-		}
-
-		for (i=0;i<fields.length;i++) {
-			// fields must all be string
-			if (typeof fields[i] != "string") {
-				console.error("validateRaw: fields must be all string ");
-				return false;
-			}
-		}
-		
-
-		// check info
 		// get the first entry and its keys
 		var info = data['info'];
 		var info_0 = info[0];
-		var block_by_values = [];
+		var ref_values = [];
 
-		// must have a name property
-		if (!info_0.hasOwnProperty('name')) {
-			console.error("validateRaw: info object must have a name property ");
+		var info_keys = Object.keys(info_0); 
+		var fields = data['fields'];
+		
+		// must have ref value to info object 
+		var refs = fields.filter(function (x) {return info_keys.indexOf(x)!=-1});
+		// reference index in fields
+		var ref_idx;
+		// reference value
+		var ref_key;
+
+		if (refs.length != 1) {
+			console.error("validateRaw: there is no ref in fields");
 			return false;
+		} else {
+			ref_key = refs[0];
+			ref_idx = fields.indexOf(ref_key);
 		}
+
+		// check info
 		// must have a property name matching block by
 		if (!info_0.hasOwnProperty(block_by)) {
 			console.error("validateRaw: info object must contain block_by property ");
 			return false;
 		}
 
-		var info_keys = [];
-		for (i in info_0) info_keys.push(i);
 		
 		for (i=0;i<info.length;i++) {
 			// for each company info
 			var cinfo = info[i];
-			block_by_values.push(cinfo[block_by]);
+			ref_values.push(cinfo[ref_key]);
 
 			for (j=0;j<info_keys.length;j++) { 
 				var key = info_keys[j];
@@ -122,6 +109,23 @@ DataLoader.prototype = {
 			}
 		}	
 
+		
+		// check fields
+		// must have 'time'
+		if (fields.indexOf('time')==-1) {
+				console.error("validateRaw: time is absent in fields ");
+			return false;
+		}
+
+		for (i=0;i<fields.length;i++) {
+			// fields must all be string
+			if (typeof fields[i] != "string") {
+				console.error("validateRaw: fields must be all string ");
+				return false;
+			}
+		}
+		
+
 		// check raw
 		// check data length
 		var raw = data['raw'];
@@ -131,14 +135,14 @@ DataLoader.prototype = {
 				return false;
 			}
 			for (j=0;j<fields.length;j++) {
-				if (!is_int(raw[i][j]) || raw[i][j]<0) {
-				console.error("validateRaw: data entry can only be positive integer ");
+				if (isNaN(raw[i][j]) || raw[i][j]<0) {
+				console.error("validateRaw: data entry can only be positive number");
 					return false;
 				}
 			}
-			// block_by value must be valid
-			if (block_by_values.indexOf(raw[i][block_by_idx]) == -1) {
-				console.error("validateRaw: entry doesn't have valid block_by value ");
+			// ref_values must be valid
+			if (ref_values.indexOf(raw[i][ref_idx]) == -1) {
+				console.error("validateRaw: entry doesn't have valid ref value ");
 				return false;
 			}
 		}
@@ -310,17 +314,19 @@ DataLoader.prototype = {
 			}
 		}
 
-		// block entries have same this.block_by value
+		// block entries have same block_by value
 		for (var i=0;i<data['bars'].length;i++) {
 			var bar = data['bars'][i];
 			var blocks = bar['blocks'];
 			for (var j=0;j<blocks.length;j++) {
 				var block = blocks[j];
 				var entries = block['entries'];
-				var idx_block_by = data['fields'].indexOf(block_by);
+				var ref_idx = data['ref_idx'];
 				var block_by_value = block.block_by; 
 				for (var k=0;k<entries.length;k++) {
-					if (entries[k][idx_block_by] != block_by_value) {
+					var ref_value = entries[k][ref_idx];
+					var ref_block_by = findInfo(data['fields'][ref_idx], ref_value, data['info'])[data['block_by']];
+					if (ref_block_by != block_by_value) {
 						console.error("validateProcessed: entry block_by value is incorrect");	
 						return false;
 					}

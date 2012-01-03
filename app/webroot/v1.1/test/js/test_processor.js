@@ -18,7 +18,7 @@ function TestSuitStackData(title, block_by, time_by_domain) {
 
 TestSuitStackData.prototype = {
 
-	"raw_incomplete_9_in_1_expected_false": function () {
+	raw_incomplete_9_in_1_expected_false: function () {
 		console.log("running test... raw_incomplete_9_in_1_expected_false");
 
 		var no_info={	"fields": ["pid", "cid", "time", "cost"],
@@ -74,22 +74,14 @@ TestSuitStackData.prototype = {
 	},
 
 	// read mal-formed json as external file
-	"raw_json_malformed_expected_false": function () {
+	raw_json_malformed_expected_false: function () {
 		console.log("running test... raw_json_malformed_expected_false");
 		return this.loader.loadRawData('data/malformed.txt', this.time_by, this.time_by_domain, 'cid')==false;
 	},
 
-	// info does not have a 'name' key
-	"raw_info_no_name_key_expected_false": function () {
-		console.log("running test... raw_info_no_name_key_expected_false");
-		var data = {"info"	: [{"company_name": "starhub", "cid": 2}],
-					"fields": ["cid", "time"],
-					"raw"	: [[2,3]]};
-		return this.loader.validateRaw(data, this.time_by, this.time_by_domain, 'cid')==false;
-	},
 
 	//info doesn't have an key match this.block_by
-	"raw_info_no_blockby_key_expected_false": function () {
+	raw_info_no_blockby_key_expected_false: function () {
 		console.log("running test... raw_info_no_blockby_key_expected_false");
 		var block_by = 'cid';
 		var data = {"info"	: [{"name": "starhub", "did": 2}],
@@ -99,7 +91,7 @@ TestSuitStackData.prototype = {
 	},
 
 	// value is both numeric and negative
-	"raw_info_negative_value_expected_false": function () {
+	raw_info_negative_value_expected_false: function () {
 		console.log("running test... raw_info_negative_value_expected_false");
 		var data = {"info"	: [{"name": "starhub", "cid": -2}],
 					"fields": ["cid", "time"],
@@ -109,7 +101,7 @@ TestSuitStackData.prototype = {
 
 	
 	// length of entry != length of fields
-	"raw_raw_entry_length_inequalto_fields_expected_false": function () {
+	raw_raw_entry_length_inequalto_fields_expected_false: function () {
 		console.log("running test... raw_raw_entry_length_inequalto_fields_expected_false");
 		var data = {"info"	: [{"name": "starhub", "cid": 2}],
 					"fields": ["cid", "time"],
@@ -118,7 +110,7 @@ TestSuitStackData.prototype = {
 	},
 
 	// data of entry contains -ve or non-numeric data type
-	"raw_raw_string_or_negative_expected_false": function () {
+	raw_raw_string_or_negative_expected_false: function () {
 		console.log("running test... raw_raw_string_or_negative_expected_false");
 		var raw_negative= {"info"	: [{"name": "starhub", "cid": 2}],
 					"fields": ["cid", "time"],
@@ -132,7 +124,7 @@ TestSuitStackData.prototype = {
 	},
 
 	// this.block_by value doesn't exist in the info
-	"raw_raw_blockby_value_not_valid_expected_false": function () {
+	raw_raw_blockby_value_not_valid_expected_false: function () {
 		console.log("running test... raw_raw_blockby_value_not_valid_expected_false");
 		// example below, the 12 doesn't match 2 
 		var data = {"info"	: [{"name": "starhub", "cid": 2}],
@@ -141,7 +133,7 @@ TestSuitStackData.prototype = {
 		return this.loader.validateRaw(data, this.time_by, this.time_by_domain, 'cid')==false;
 	},
 
-	"raw_fields_no_blockby_expected_false": function () {
+	raw_fields_no_blockby_expected_false: function () {
 		console.log("running test... raw_fields_no_blockby_expected_false");
 		var data = {"info"	: [{"name": "starhub", "cid": 2}],
 					"fields": ["did", "time"],
@@ -150,7 +142,7 @@ TestSuitStackData.prototype = {
 	},
 
 	// fields doesn't have a 'time' value
-	"raw_fields_no_time_expected_false": function () {
+	raw_fields_no_time_expected_false: function () {
 		console.log("running test... raw_fields_no_time_expected_false");
 		var data = {"info"	: [{"name": "starhub", "cid": 2}],
 					"fields": ["cid", "date"],
@@ -159,7 +151,7 @@ TestSuitStackData.prototype = {
 	},
 
 	// field not all string
-	"raw_fields_value_not_string_expected_false": function () {
+	raw_fields_value_not_string_expected_false: function () {
 		console.log("running test... raw_fields_value_not_string_expected_false");
 		var data = {"info"	: [{"name": "starhub", "cid": 2}],
 					"fields": ["cid", "time", 9],
@@ -167,7 +159,7 @@ TestSuitStackData.prototype = {
 		return this.loader.validateRaw(data, this.time_by, this.time_by_domain, 'cid')==false;
 	},
 
-	"valid_bar_by_domain_expected_true": function () {
+	valid_bar_by_domain_expected_true: function () {
 		console.log("running test... valid_bar_by_domain_expected_true");
 		var i;
 		var len = this.time_by_domain.length;
@@ -200,7 +192,7 @@ TestSuitStackData.prototype = {
 	// test each data field
 
 
-	"processed_data_no_info_expected_false": function () {
+	processed_data_no_info_expected_false: function () {
 		console.log("running test... processed_data_no_info_expected_false");
 
 		var data_no_info = {};
@@ -209,7 +201,7 @@ TestSuitStackData.prototype = {
 
 		return this.loader.validateProcessed(data_no_info, this.valid_input, this.time_by, this.time_by_domain, this.block_by) == false;
 	}, 
-	"processed_data_no_fields_expected_false": function () {
+	processed_data_no_fields_expected_false: function () {
 		console.log("running test... processed_data_no_fields_expected_false");
 
 		var data_no_fields= {};
@@ -218,7 +210,7 @@ TestSuitStackData.prototype = {
 
 		return this.loader.validateProcessed(data_no_fields, this.valid_input, this.time_by, this.time_by_domain, this.block_by) == false;
 	},
-	"processed_data_no_bars_expected_false": function () {
+	processed_data_no_bars_expected_false: function () {
 		console.log("running test... processed_data_no_bars_expected_false");
 
 		var data_no_bars= {};
@@ -230,7 +222,7 @@ TestSuitStackData.prototype = {
 
 
 	// info and fields are expected unchanged
-	"processed_data_fields_changed_expected_false": function () {
+	processed_data_fields_changed_expected_false: function () {
 		console.log("running test... processed_data_fields_changed_expected_false");
 
 		var data_changed_fields= {};
@@ -244,7 +236,7 @@ TestSuitStackData.prototype = {
 
 		return this.loader.validateProcessed(data_changed_fields, this.valid_input, this.time_by, this.time_by_domain, this.block_by) == false;
 	},
-	"processed_data_info_changed_expected_false": function () {
+	processed_data_info_changed_expected_false: function () {
 		console.log("running test... processed_data_info_changed_expected_false");
 
 		var data_changed_info= {};
@@ -260,7 +252,7 @@ TestSuitStackData.prototype = {
 
 
 	// testing the bars
-	"processed_data_bars_not_StackBar_expected_false": function () {
+	processed_data_bars_not_StackBar_expected_false: function () {
 		console.log("running test... processed_data_bars_not_StackBar_expected_false");
 
 		var data_invalid_bars= {};
@@ -275,7 +267,7 @@ TestSuitStackData.prototype = {
 	},
 
 
-	"processed_data_bar_incorrect_count_expected_false": function () {
+	processed_data_bar_incorrect_count_expected_false: function () {
 		console.log("running test... processed_data_bar_incorrect_count_expected_false");
 
 		var data_incorrect_bar_count={};
@@ -289,7 +281,7 @@ TestSuitStackData.prototype = {
 		rand_bar.count++;
 		return this.loader.validateProcessed(data_incorrect_bar_count, this.valid_input, this.time_by, this.time_by_domain, this.block_by) == false;
 	},
-	"processed_data_bar_incorrect_levels_expected_false": function () {
+	processed_data_bar_incorrect_levels_expected_false: function () {
 		console.log("running test... processed_data_bar_incorrect_levels_expected_false");
 
 		var data_incorrect_bar_levels={};
@@ -303,7 +295,7 @@ TestSuitStackData.prototype = {
 		rand_bar.levels++;
 		return this.loader.validateProcessed(data_incorrect_bar_levels, this.valid_input, this.time_by, this.time_by_domain, this.block_by) == false;
 	},
-	"processed_data_bar_incorrect_time_expected_false": function () {
+	processed_data_bar_incorrect_time_expected_false: function () {
 		console.log("running test... processed_data_bar_incorrect_time_expected_false");
 
 		var data_incorrect_bar_time={};
@@ -322,7 +314,7 @@ TestSuitStackData.prototype = {
 
 	// check blocks
 	
-	"processed_data_block_not_StackBlock_expected_false": function () {
+	processed_data_block_not_StackBlock_expected_false: function () {
 		console.log("running test... processed_data_block_not_StackBlock_expected_false");
 
 		var data_incorrect_block_type={};
@@ -336,7 +328,7 @@ TestSuitStackData.prototype = {
 		return this.loader.validateProcessed(data_incorrect_block_type, this.valid_input, this.time_by, this.time_by_domain, this.block_by) == false;
 	}, 
 
-	"processed_data_block_incorrect_entry_length_expected_false": function () {
+	processed_data_block_incorrect_entry_length_expected_false: function () {
 		console.log("running test... processed_data_block_incorrect_entry_length_expected_false");
 
 		var data_incorrect_block_entry_length={};
@@ -350,7 +342,7 @@ TestSuitStackData.prototype = {
 		return this.loader.validateProcessed(data_incorrect_block_entry_length, this.valid_input, this.time_by, this.time_by_domain, this.block_by) == false;
 	},
 
-	"processed_data_block_incorrect_entry_block_by_value_expected_false": function () {
+	processed_data_block_incorrect_entry_block_by_value_expected_false: function () {
 		console.log("running test... processed_data_block_incorrect_entry_block_by_value_expected_false");
 
 		var data_incorrect_entry_block_by_value={};
@@ -365,7 +357,7 @@ TestSuitStackData.prototype = {
 		return this.loader.validateProcessed(data_incorrect_entry_block_by_value, this.valid_input, this.time_by, this.time_by_domain, this.block_by) == false;
 	},
 
-	"valid_processed_data_expected_true": function () {
+	valid_processed_data_expected_true: function () {
 		console.log("running test... valid_processed_data_expected_true");
 		return this.loader.validateProcessed(this.valid_output, this.valid_input, this.time_by, this.time_by_domain, this.block_by);
 	}

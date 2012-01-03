@@ -24,7 +24,7 @@ SGPlotter.prototype = {
 	 * A: path, uri to the JSON data file
 	 * D: retrieve data through get request; synchronous process; setData upon success
 	 * */
-	'getData': function (path) {
+	getData: function (path) {
 		var req = new XMLHttpRequest();
 		req.open('get', path, false);
 		req.send(null);
@@ -40,14 +40,15 @@ SGPlotter.prototype = {
 	 * A: data, JSON data as per https://docs.google.com/document/pub?id=11tjO6EYsB35rnr3hKCeZpBiKV4_QbICneHDayHm4AYU&pli=1
 	 * D: set the data required to draw the graph
 	 * */
-    'setData': function (data) {
+    setData: function (data) {
 		this.bar_by = data.bar_by;
 		this.bar_by_domain = data.bar_by_domain;
 		this.block_by = data.block_by;
         this.data = data.bars;
 		this.info = data.info;
 		this.fields = data.fields;
-		this.max_block_levels = this.info.length;
+		this.ref_idx = data.ref_idx;
+		this.block_levels = data.block_levels;
     },
 	
 	/*
@@ -56,7 +57,7 @@ SGPlotter.prototype = {
 	 * D: remove previous drawn graph if exist; draw the graph background; show loading;  
 	 *
 	 * */
-    'init': function () {
+    init: function () {
         d3.select('svg').remove();
         
         // main canvas
@@ -94,7 +95,7 @@ SGPlotter.prototype = {
 	 * D: do some computation of variables from data supplied before actual drawing
 	 *		computation include: bar_width, create separators, create sliding container, set selected bar 
 	 * */
-    'preDraw': function () {
+    preDraw: function () {
         d3.select('#loading').remove();
         // calculated config
         this.bar_width = this.data[0]['time_by'].length*8;
@@ -121,7 +122,7 @@ SGPlotter.prototype = {
 	 * A: none
 	 * D: call all the draw functions 
 	 * */
-    'draw': function () {
+    draw: function () {
         this.preDraw();
         this.drawBarAndLine();
         this.drawLabels();
@@ -133,7 +134,7 @@ SGPlotter.prototype = {
 	 * A: none
 	 * D: setup regions for drawing bars and lines, setup click listeners for handling paging, call update method to actually draw
 	 * */
-    'drawBarAndLine': function () {
+    drawBarAndLine: function () {
         var data = this.container;
         var self = this;
         var y_coord = d3.scale.linear().range([0, config.chart_height]).domain([0, d3.max(this.data, function (d) {return d.count;})]);
@@ -211,7 +212,7 @@ SGPlotter.prototype = {
 	 * A: none 
 	 * D: use the updated data, then enter bar and line
 	 * */
-    'enterBar': function () {
+    enterBar: function () {
 		var data=this.container;
         var self=this;
 
@@ -289,13 +290,13 @@ SGPlotter.prototype = {
         .attr('height', function (d) {return self.y_coord(d.entries.length)})
         .attr('x', config.bar_margin/2)
         .attr('y', function (d) {return self.y_coord(d.acc);})
-        .attr('fill', function (d) {return config.color(d['block_by']/self.max_block_levels);})
+        .attr('fill', function (d) {var color = config.color(self.block_levels.indexOf(d['block_by'])/self.block_levels.length); return color;})
         .attr('stroke-width', 0);
         
 		d3.selectAll('title.block').remove();
         // block title
         d3.selectAll('rect.block').append('svg:title').attr('class', 'block').text(function (d) {
-                return findInfo(self.block_by, d.block_by, self.info).name+"\r\ncount: "+d['entries'].length.toFixed(2).replace(".00", "");
+                return findInfo(self.block_by, d.block_by, self.info)[self.block_by]+"\r\ncount: "+d['entries'].length.toFixed(2).replace(".00", "");
         });
         
 		
@@ -310,7 +311,7 @@ SGPlotter.prototype = {
 	 *		container data is the actual data that have been drawn
 	 *		it has has left and right buffer which is of width equal to screen size
 	 * */
-    'updateContainer': function (dir) {
+    updateContainer: function (dir) {
 		// positional index
         var screen_pos = ~~(this.screen_x/(this.bar_width+config.bar_margin));
         
@@ -356,7 +357,7 @@ SGPlotter.prototype = {
 	 *		bars use container data to enter and exit its element
 	 *		lines use container data to compute position, then remove everything before drawing
 	 * */
-    'update': function (dir) {
+    update: function (dir) {
         if (dir!='') while (!this.updateContainer(dir));
         this.enterBar();
         this.exitBar();
@@ -368,7 +369,7 @@ SGPlotter.prototype = {
 	 * A: none
 	 * D: remove extra DOM element according to updated data
 	 * */
-    'exitBar': function () {
+    exitBar: function () {
 		var data=this.container;
         d3.selectAll('g.bar').data(data, function (d) {return d.time;}).exit().remove();
     },
@@ -382,7 +383,7 @@ SGPlotter.prototype = {
 	 *		this is because line values are computed by SGPlotter
 	 *		it makes it easy to switch selected line values (so no need to redraw bar chart every time line selection is changed)
 	 * */
-	'drawLine': function () {
+	drawLine: function () {
 		var data=this.container;
 		var self=this;
         
@@ -452,7 +453,7 @@ SGPlotter.prototype = {
 	 * D: draw labels
 	 *		all static labels
 	 * */
-    'drawLabels': function () {
+    drawLabels: function () {
         this.labels.append('svg:line')
         .attr('class', 'bottom')
         .attr('x1', config.pad[3])
@@ -463,7 +464,7 @@ SGPlotter.prototype = {
          
         
         // draw chart title
-        this.labels.append('svg:text').text('No. of checkins per company over a '+this.bar_by)
+        this.labels.append('svg:text').text('No. of checkins per '+this.block_by+' over a '+this.bar_by)
         .attr('transform', 'translate('+config.pad[3]+','+(config.pad[0]-50)+') scale(1.5) ')
 	
         // left region pane
@@ -529,7 +530,7 @@ SGPlotter.prototype = {
         var legend_width = config.pad[1]-config.pad[3];
         var legend_height = config.svg_height;
         var legend_x = config.pad[3]+config.chart_width + config.pad[3];
-        var legend_y = -100;
+        var legend_y = 0;
 		
         var legend = d3.select('g.legend_region').append('svg:g').attr('class', 'legend')
         .attr('transform', 'translate('+legend_x+','+legend_y+')')
@@ -539,15 +540,15 @@ SGPlotter.prototype = {
         .attr('height', legend_height)
         .attr('fill', config.background_color);
         
-        var levels = this.max_block_levels;
+        var levels = this.block_levels;
         var color = function (level) {
-            return config.color(level/levels);
+            return config.color(levels.indexOf(level)/levels.length);
         }
         var bw=10, bh=10, bmargin=10;
         
-        var l = legend.selectAll('g.icon').data(d3.range(levels)).enter().append('svg:g').attr('class', 'icon')
+        var l = legend.selectAll('g.icon').data(levels).enter().append('svg:g').attr('class', 'icon')
         .attr('transform', function (d) {
-            return 'translate(0, '+(100 + (levels - d) *(bh+bmargin))+')';
+            return 'translate(0, '+(levels.length - levels.indexOf(d)) *(bh+bmargin)+')';
         })
 			
         l.append('svg:rect').attr('fill', function (d) {return color(d);} ).attr('width', bw).attr('height', bh)
@@ -556,14 +557,15 @@ SGPlotter.prototype = {
         var self=this;
         l.append('svg:text')
         .text(function (d) {
-            return findInfo("companyId", d+1, self.info).name;
+            var ret=findInfo(self.block_by, d, self.info);
+			return ret[self.block_by];
             })
         .attr('stroke', 'DarkSlateGrey')
         .attr('stroke-width', 0.1)
         .attr('dx', 20)
         .attr('dy', bh);
         
-        var lvl = 150 + levels*(bh+bmargin);
+        var lvl = 50 + levels.length*(bh+bmargin);
         legend.append('svg:line')
         .attr('x1', 0)
         .attr('y1', lvl)
@@ -592,6 +594,14 @@ SGPlotter.prototype = {
         .text('Average for Line')
         .attr('stroke', 'black')
         .attr('stroke-width', 0.1);
+
+		// adjust legend position to middle
+		var total_height = lvl+4*2+50;
+		var margin_top = (config.svg_height- total_height) /2;
+
+		if (margin_top>0) {
+			legend.attr('transform', 'translate('+legend_x+','+margin_top+')')
+		}
     },
 
 	/*
@@ -601,7 +611,7 @@ SGPlotter.prototype = {
 	 *		it is used when left/right key pressed
 	 *		separators is an array of bar index
 	 * */
-    'createSeparator': function () {
+    createSeparator: function () {
         var curMarker='';
         var marker_by='';
         var bars = this.data;
@@ -640,7 +650,7 @@ SGPlotter.prototype = {
 	 * A: curPos, the index of current bar on the leftmost screen
 	 * R: get next separator
 	 * */
-    'getNextSeparator': function (curPos) {
+    getNextSeparator: function (curPos) {
         var pos=0;
         for (var i=0;i<this.separators.length;i++) {
             var pos = this.separators[i]*(config.bar_margin+this.bar_width);
@@ -654,7 +664,7 @@ SGPlotter.prototype = {
 	 * A: curPos, the index of current bar on the leftmost screen
 	 * R: get previous separator
 	 * */
-    'getPreSeparator': function (curPos) {
+    getPreSeparator: function (curPos) {
         var pos=0;
         for (var i=this.separators.length-1;i>=0;i--) {
             var pos = this.separators[i]*(config.bar_margin+this.bar_width);
@@ -669,7 +679,7 @@ SGPlotter.prototype = {
 	 * D: create the popup graph
 	 *		popup shows the breakdown of data in the selected time
 	 * */
-    'popup':function (bar, self) {
+    popup: function (bar, self) {
         var pad=[10, 0, 0, 30];
         var blocks = bar.blocks;
 		var label = bar.time_by;
@@ -677,7 +687,7 @@ SGPlotter.prototype = {
 		var total = bar.count;
 		var perc = blocks.map(function (b) {return b['entries'].length;});
 		var clipPath = d3.select('#svg').append('svg:clipPath').attr('id', 'popup_clip').attr('class', 'popup');
-		var max_block_levels = self.max_block_levels;
+		var block_levels = self.block_levels;
 	
 		// define the clip region
 		clipPath.append('svg:rect')
@@ -704,7 +714,7 @@ SGPlotter.prototype = {
 		popup_canvas.append('svg:text')
         .attr('x', config.pad[3]+config.popup_text_width)
         .attr('y', config.pad[0]/2)
-        .text('No. of checkins per company at '+label)
+        .text('No. of checkins per '+this.block_by+' at '+label)
         .attr('stroke-width', 0.3)
         .style('font-size', 24)
         .attr('fill', 'lightblue');
@@ -720,7 +730,7 @@ SGPlotter.prototype = {
 		.transition().delay(function (d, i) {return 50*i;})
 		.attr('width', function (d, i) {return x_coord(d['entries'].length)})
 		.attr('height', bar_width)
-		.attr('fill', function (d, i) {return config.color(d['block_by']/max_block_levels);})
+		.attr('fill', function (d, i) {return config.color(block_levels.indexOf(d['block_by'])/block_levels.length);})
 		.attr('stroke', 'black')
 		.attr('stroke-width', 1); 
 	
@@ -730,7 +740,7 @@ SGPlotter.prototype = {
         .attr('fill', 'white')
         .attr('stroke-width', 0)
         .style('font-size', 18)
-        .text(function (d) {return findInfo("companyId", parseInt(d['block_by']), self.info).name;})
+        .text(function (d) {return findInfo(self.block_by, d['block_by'], self.info)[self.block_by];})
         .attr('dx', -4)
         .attr('dy', bar_width/2)
         .attr('text-anchor', 'end')
@@ -749,7 +759,7 @@ SGPlotter.prototype = {
 		.attr('stroke-width', 0.1)
 		
         bars.append('svg:title')
-        .text(function (d) {return findInfo("companyId", parseInt(d['block_by']), self.info).name;});
+        .text(function (d) {return findInfo(self.block_by, d['block_by'], self.info)[self.block_by];});
 
     },
 
@@ -758,7 +768,7 @@ SGPlotter.prototype = {
 	 * A: hide, boolean indicating the visibility to set
 	 * D: toggle the visibility of line graph
 	 * */
-    'toggleLine': function (hide) {
+    toggleLine: function (hide) {
 		config.show_line=!hide;
         if (hide) {
             d3.selectAll('.lines').attr('visibility', 'hidden');
@@ -778,7 +788,7 @@ SGPlotter.prototype = {
 	 * A: hide, boolean indicating the visibility to set
 	 * D: toggle the visibility of bar graph
 	 * */
-    'toggleBar': function (hide) {
+    toggleBar: function (hide) {
 		config.show_bar = !hide;
         if (hide) {
 			d3.selectAll('.y1.axis').attr('visibility', 'hidden');
@@ -798,7 +808,7 @@ SGPlotter.prototype = {
 	 * A: none
 	 * D: draw the average line for bar and line charts
 	 * */
-    'drawAverageLine': function () {
+    drawAverageLine: function () {
 		var range = getAverageRange(config.average_line_by, this.selected_bar, this.data);
 		
 		this.average_range = range;
@@ -859,67 +869,7 @@ function loading() {
 	count++;
 }
 
-/*
- * N: lineValue 
- * A: bar, d3 bar object; idx_of_line, index of fields to show 
- * D: sum the line value of all entries on each bar 
- * R: return the sum
- * */
-function lineValue(bar,idx_of_line) {
-	var sum=0;
-	for (var i=0;i<bar.blocks.length;i++) {
-		sum+=d3.sum(bar.blocks[i].entries, function (d) {return d[idx_of_line];});
-	}
-	return sum;
-}
 
-/*
- * N: getFormatedTime
- * A: time, timestamp in hours; by, the time_by value
- * R: return the formated string
- * */
-function getFormatedTime(time, by) {
-    var milisec = time * 3600 * 1000;
-    var date = new Date(milisec);
-    var format;
-    switch (by) {
-        case 'hour':
-            format = date.format('d/mm htt');
-            break;
-        case 'week':
-            format = getWeekFormat(date);
-            break;
-        case 'month':
-            format = date.format('mmmm yy');
-            break;
-        case 'day':
-            format = date.format('ddd d/mm');
-            break;
-        default:
-            format = time;
-    }
-    return format;
-}
-
-/*
- * N: getWeekFormat
- * A: date, js date object
- * D: get the time string when the time_by is 'week'
- * R: return the weeks tring for selected date
- * */
-function getWeekFormat(date) {
-    var year = date.format('yyyy');
-    // first day of the year, 0 week
-    var d = new Date(year, 0,1,0,0,0);
-    // difference in days
-    var diff = (date.getTime() - d.getTime())/(1000*24*3600);
-    // add offset of first day
-    var wd = d.format('dddd');
-    diff += ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].indexOf(wd);
-    // divided by 7
-    var weeks = ~~(diff/7)+1.
-    return "week "+weeks+", "+year;
-} 
 
 /*
  * N: getAverageRange
@@ -969,14 +919,3 @@ function getAverageRange (by, selected_bar, data) {
 
 }
 
-/*
- * find textual information in info of input data
- * used in graph plotter
- * */
-function findInfo(field, value, info) {
-	for (var i=0;i<info.length;i++) {
-    	var e = info[i];
-        if (e[field]==value) return e;
-	}
-	return null;
-}

@@ -18,7 +18,7 @@ function DataProcessor(time_by, time_by_domain, block_by, path) {
 }
 
 DataProcessor.prototype = {
-	'get': function (path) {
+	get: function (path) {
 		var data = this.loader.loadRawData(path, this.time_by, this.time_by_domain, this.block_by);
 		if (data) {
 			this.data=data;
@@ -27,7 +27,7 @@ DataProcessor.prototype = {
 			return false;
 		}
 	},
-    "process": function (raw) {
+    process: function (raw) {
 		var ret;
 		if (raw!=undefined && this.loader.validateRaw(raw, this.time_by, this.time_by_domain, this.block_by)) 
 			ret = process(raw, this.time_by, this.block_by, this.time_by_domain);
@@ -53,6 +53,12 @@ function process(raw, time_by, block_by, time_by_domain) {
         return e1[idx_bar_by] - e2[idx_bar_by];
     });
 
+	// reference key
+	var info_keys = Object.keys(data['info'][0]);
+	var ref_key = data['fields'].filter(function (x) {return info_keys.indexOf(x) !=-1})[0];
+	
+	// reference key index in fields
+	var ref_idx= data['fields'].indexOf(ref_key);
     var bar_objs= {}; 
 
     for (var i=0;i<raw.raw.length;i++) {
@@ -63,7 +69,11 @@ function process(raw, time_by, block_by, time_by_domain) {
         if (!(bar_objs[label] instanceof StackBar)) {
             bar_objs[label]=new StackBar(time, label);
         }
-        bar_objs[label].add(entry, data['fields'].indexOf(block_by));
+
+		var ref_value = entry[ref_idx];
+		var ref = findInfo(ref_key, ref_value, data['info']);
+		var block_by_value = ref[block_by];
+        bar_objs[label].add(entry, block_by_value);
     }
 	// get bars array
    	data['bars'] = getArray(bar_objs).sort(function (a, b) {return a.time - b.time;});	
@@ -71,6 +81,10 @@ function process(raw, time_by, block_by, time_by_domain) {
 	data['bar_by'] = time_by;
 	data['bar_by_domain']=time_by_domain;
 	data['block_by']=block_by;
+	data['ref_idx']=ref_idx;
+	data['block_levels'] = [];
+	// get unique block by values
+	data['info'].map(function (info) {if (data['block_levels'].indexOf(info[block_by]) == -1) data['block_levels'].push(info[block_by]);}); 
 
     return data;
 }
@@ -92,15 +106,15 @@ function StackBar(time, label) {
 }
 
 StackBar.prototype = {
-    "add" : function (entry, idx_block_by) {
-        if (!(this.blocks[entry[idx_block_by]] instanceof StackBlock)) {
-            this.blocks[entry[idx_block_by]] = new StackBlock(entry[idx_block_by]);
+    add : function (entry, block_by_value ) {
+        if (!(this.blocks[block_by_value ] instanceof StackBlock)) {
+            this.blocks[block_by_value] = new StackBlock(block_by_value);
             this.levels++;
         }
-        this.blocks[entry[idx_block_by]].entries.push(entry);
+        this.blocks[block_by_value].entries.push(entry);
         this.count++;
     },
-	"convertBlock": function () {
+	convertBlock: function () {
 		this.blocks = getArray(this.blocks);
 		var acc = 0;
 		this.blocks.sort(function (a,b) {return a.entries.length - b.entries.length;});
@@ -115,51 +129,5 @@ StackBar.prototype = {
 function StackBlock(block_by) {
 	this.block_by= block_by;
 	this.entries=[];
-}
-
-// used in graph plotter and worker
-function getFormatedTime(time, by) {
-    var milisec = time * 3600 * 1000;
-    var date = new Date(milisec);
-    var format;
-    switch (by) {
-        case 'hour':
-            format = date.format('d/mm htt');
-            break;
-        case 'week':
-            format = getWeekFormat(date);
-            break;
-        case 'month':
-            format = date.format('mmmm yy');
-            break;
-        case 'day':
-            format = date.format('ddd d/mm');
-            break;
-        default:
-            format = time;
-    }
-    return format;
-}
-
-
-function getWeekFormat(date) {
-    var year = date.format('yyyy');
-    // first day of the year, 0 week
-    var d = new Date(year, 0,1,0,0,0);
-    // difference in days
-    var diff = (date.getTime() - d.getTime())/(1000*24*3600);
-    // add offset of first day
-    var wd = d.format('dddd');
-    diff += ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].indexOf(wd);
-    // divided by 7
-    var weeks = ~~(diff/7)+1.
-    return "week "+weeks+", "+year;
-}
-function is_int(value){
-	if((parseFloat(value) == parseInt(value)) && !isNaN(value)){
-	  	return true;
-	} else {
-	  	return false;
-	} 
 }
 

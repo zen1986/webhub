@@ -37,7 +37,7 @@ function TestSuitStackGraph (title, path, time_by_domain, block_by) {
 TestSuitStackGraph.prototype = {
 
 	// scroll container is able to cover all bars
-	"can_show_all_bars_expected_automatic": function () {
+	can_show_all_bars_expected_automatic: function () {
 		console.log("running test...can_show_all_bars_expected_automatic");
 
 		var self = this;
@@ -67,7 +67,7 @@ TestSuitStackGraph.prototype = {
 
 	},
 
-	"end_of_scroll_not_exceed_one_bar_width_expected_automatic": function () {
+	end_of_scroll_not_exceed_one_bar_width_expected_automatic: function () {
 		console.log("running test...end_of_scroll_not_exceed_one_bar_width_expected_automatic");
 
 		// check the screen_x, it should be in range [0, total_bars*(margin+width)]
@@ -83,7 +83,7 @@ TestSuitStackGraph.prototype = {
 	},
 
 	// all blocks within a bar are drawn and in correct order
-	"blocks_drawn_correct_order_expected_true": function () {
+	blocks_drawn_correct_order_expected_true: function () {
 		console.log("running test...blocks_drawn_correct_order_expected_true");
 
 		// check the y axis in each block
@@ -126,7 +126,7 @@ TestSuitStackGraph.prototype = {
 	},
 
 	// all blocks are drawn with correct color
-	"blocks_colors_correspond_to_legend_expected_true": function () {
+	blocks_colors_correspond_to_legend_expected_true: function () {
 		console.log("running test...blocks_colors_correspond_to_legend_expected_true");
 		// select legends
 		var legend = d3.selectAll('g.legend g.icon rect');
@@ -169,7 +169,7 @@ TestSuitStackGraph.prototype = {
 	},
 
 	// average line is always associated with correct average value for bar and lines
-	"correct_bars_selected_to_compute_average_expected_true": function () {
+	correct_bars_selected_to_compute_average_expected_true: function () {
 		console.log("running test...correct_bars_selected_to_compute_average_expected_true");
 		// value of average line
 		// currently selected bar
@@ -205,7 +205,7 @@ TestSuitStackGraph.prototype = {
 		return true;
 	},
 
-	"average_bar_has_correct_value_expected_true": function () {
+	average_bar_has_correct_value_expected_true: function () {
 		console.log("running test...average_bar_has_correct_value_expected_true");
 
 		var bar_average = this.plotter.bar_average;
@@ -214,7 +214,7 @@ TestSuitStackGraph.prototype = {
 		else return true;
 	},
 
-	"average_line_has_correct_value_expected_true": function () {
+	average_line_has_correct_value_expected_true: function () {
 		console.log("running test...average_line_has_correct_value_expected_true");
 	
 		var line_average = this.plotter.line_average;
@@ -225,7 +225,7 @@ TestSuitStackGraph.prototype = {
 	},
 
 	// line values is correct for all bars
-	"line_value_is_correct_expected_true": function () {
+	line_value_is_correct_expected_true: function () {
 		console.log("running test...line_value_is_correct_expected_true");
 
 		var line_points = d3.selectAll('g.line_point');
@@ -245,7 +245,7 @@ TestSuitStackGraph.prototype = {
 	},
 
 	// more than 90% of the graph height are covered with items
-	"graph_height_has_over_90%_coverage_expected_true": function () {
+	graph_height_has_over_90_coverage_expected_true: function () {
 		console.log("running test...graph_height_has_over_90");
 		// check highest bar 
 		// should be taller than 90%
@@ -271,7 +271,7 @@ TestSuitStackGraph.prototype = {
 	},
 
 	// popup will be shown correctly
-	"popup_shown_correct_expected_true": function () {
+	popup_shown_correct_expected_true: function () {
 		console.log("running test...popup_shown_correct_expected_true");
 
 		var popup_working = false;
