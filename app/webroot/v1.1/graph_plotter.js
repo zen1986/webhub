@@ -24,24 +24,8 @@ function SGPlotter(id) {
 
 SGPlotter.prototype = {
 	/*
-	 * N: getData
-	 * A: path, uri to the JSON data file
-	 * D: retrieve data through get request; synchronous process; setData upon success
-	 * */
-	getData: function (path) {
-		var req = new XMLHttpRequest();
-		req.open('get', path, false);
-		req.send(null);
-		if (req.readyState==4) {
-			var response = req.responseText;
-			var data = JSON.parse(response);
-			this.setData(data);
-		}
-	},
-
-	/*
 	 * N: setData
-	 * A: data, JSON data as per https://docs.google.com/document/pub?id=11tjO6EYsB35rnr3hKCeZpBiKV4_QbICneHDayHm4AYU&pli=1
+	 * A: data
 	 * D: set the data required to draw the graph
 	 * */
     setData: function (data) {
@@ -51,12 +35,13 @@ SGPlotter.prototype = {
         this.data = data.bars;
 		this.info = data.info;
 		this.fields = data.fields;
+		initBlockColor(this);
     },
 	
 	/*
 	 * N: init
 	 * A: none
-	 * D: remove previous drawn graph if exist; draw the graph background; show loading;  
+	 * D: remove previous drawn graph if exist; draw the graph background
 	 *
 	 * */
     init: function () {
@@ -102,7 +87,7 @@ SGPlotter.prototype = {
         this.bar_width = this.data[0]['time_by'].length*8;
         
 		// theoretical width
-        var full_width = this.data.length*(this.bar_width+config.bar_margin)+config.bar_margin;
+        var full_width = this.data.length*(this.bar_width+config.bar_margin);
         this.draggable_width = Math.max(0,full_width - config.chart_width);
         
         this.createSeparator();
@@ -126,8 +111,7 @@ SGPlotter.prototype = {
         this.preDraw();
         this.drawLabels();
         this.drawBarAndLine();
-		this.drawAverageLine();
-		
+		this.postDraw();
     },
 
 	/*
@@ -200,12 +184,16 @@ SGPlotter.prototype = {
 	 * */
     update: function (dir) {
         if (dir!='') while (!this.updateContainer(dir));
-        this.enterBar();
-        this.exitBar();
-		this.drawLine();
+		this.updateBar();
+		this.updateLine();
 		this.toggleLine(config.show_line);
 		this.toggleBar(config.show_bar);
     },
+
+	updateBar: function () {
+        this.enterBar();
+        this.exitBar();
+	},
 
 	/*
 	 *
@@ -228,7 +216,6 @@ SGPlotter.prototype = {
 			.attr('time', function (d) {return d.time;})
 			.attr('transform', function (d,i) {return 'translate('+((config.bar_margin+self.bar_width)*(i+self.container_pos))+', 0)';});
 
-		console.log(bars);
 		// attach rect to bar groups
         var a = bars.append('svg:rect').attr('class', 'bar_background');
         this.renderBarBackground();
@@ -320,7 +307,7 @@ SGPlotter.prototype = {
     },
 
 	/*
-	 * N: drawLine
+	 * N: updateLine 
 	 * A: none
 	 * D: draw the line graph
 	 *		lines are drawn differently from bars
@@ -328,7 +315,7 @@ SGPlotter.prototype = {
 	 *		this is because line values are computed by SGPlotter
 	 *		it makes it easy to switch selected line values (so no need to redraw bar chart every time line selection is changed)
 	 * */
-	drawLine: function () {
+	updateLine: function () {
 		var data=this.container;
 		var self=this;
         
@@ -411,13 +398,13 @@ SGPlotter.prototype = {
 			.attr('height', config.svg_height)
 			.attr('fill', config.background_color)
 
-		left.append('svg:g').attr('class', 'y1 axis').attr('transform', 'translate('+(config.pad[3])+','+(config.pad[0])+')');
+		left.append('svg:g').attr('class', 'y1 axis block').attr('transform', 'translate('+(config.pad[3])+','+(config.pad[0])+')');
 		this.renderY1Axis(this.mode);
         
         // title on the left
         left.append('svg:text')
 			.text('No. of Checkins (bar)')
-			.attr('class', 'left_region_label')
+			.attr('class', 'left_region_label block')
 			.attr('fill', 'black')
 			.attr('text-anchor', 'middle')
 			.attr('transform', 'rotate(270, 0, 0) translate(-'+(config.chart_height/2+config.pad[0])+', 50) scale(1.2)');
@@ -431,7 +418,7 @@ SGPlotter.prototype = {
 		var idx_of_line = this.fields.indexOf(config.line_by);
         var line_coord = d3.scale.linear().range([config.chart_height, 0]).domain([0,d3.max(this.data, function (d) {return lineValue(d,idx_of_line);})]);
 		var y2Axis = d3.svg.axis().scale(line_coord).orient('right');
-		right.append('svg:g').attr('class', 'y2 axis').attr('transform', 'translate(0, '+config.pad[0]+')').call(y2Axis); 
+		right.append('svg:g').attr('class', 'y2 axis lines').attr('transform', 'translate(0, '+config.pad[0]+')').call(y2Axis); 
 		this.labels.select('.y2.axis').selectAll('*').attr('fill', config.line_color);
    
 		// title on the right 
@@ -443,7 +430,7 @@ SGPlotter.prototype = {
 			.text('Points '+past_tense)
 			.attr('fill', 'black')
 			.attr('text-anchor', 'middle')
-			.attr('class', 'right_region_label')
+			.attr('class', 'right_region_label lines')
 			.attr('dx', 0)
 			.attr('dy', config.pad[0]+config.chart_height/2-10)
 			.attr('transform', 'rotate(90,0,'+(config.pad[0]+config.chart_height/2)+') translate(0, '+(-config.pad[3])+') scale(1.2)');
@@ -456,9 +443,6 @@ SGPlotter.prototype = {
 			.attr('fill', config.background_color);
         // legend
 		var levels = getValues(this.info[this.block_by]);
-        var color = function (level) {
-            return config.color(levels.indexOf(level)/levels.length);
-        }
         var bw=10, bh=10, bmargin=10;
         
         var l = legend.selectAll('g.icon').data(levels).enter().append('svg:g').attr('class', 'icon')
@@ -466,7 +450,7 @@ SGPlotter.prototype = {
             return 'translate(0, '+(levels.length - levels.indexOf(d)) *(bh+bmargin)+')';
         })
 			
-        l.append('svg:rect').attr('fill', function (d) {return color(d);} ).attr('width', bw).attr('height', bh)
+        l.append('svg:rect').attr('fill', function (d) {return blockColor(d);} ).attr('width', bw).attr('height', bh)
 		.attr('level', function (d) {return d;});
 			
         var self=this;
@@ -601,12 +585,12 @@ SGPlotter.prototype = {
 			levels = getValues(this.info[this.block_by]);
 			arc = d3.svg.arc().innerRadius(0).outerRadius(r);
 
-		var color = function (level) {
-            return config.color(levels.indexOf(level)/levels.length);
-		};
 		donut.value(function (d) {return d.entries.length;});
         
-		var popup_canvas = self.svg.append('svg:g').attr('class', 'popup').attr('time', bar.time);
+		var popup_canvas = self.stage.append('svg:g').attr('class', 'popup').attr('time', bar.time);
+
+		var adjustment = 24;
+		popup_canvas.append('svg:rect').attr('width', config.chart_width).attr('height', config.chart_height+adjustment).attr('y', config.pad[0]-adjustment).attr('fill', 'black').attr('opacity', 0.8);
 
 		$('#'+this.graph_id+' g.popup').on('click', function () {
 			self.svg.selectAll('.popup').remove();
@@ -630,7 +614,7 @@ SGPlotter.prototype = {
 			}
 		}
 
-		var paths = arcs.append("svg:path").attr("class", "popup").attr("fill", function(d) { return color(d.data.block_by); });
+		var paths = arcs.append("svg:path").attr("class", "popup").attr("fill", function(d) { return blockColor(d.data.block_by); });
 		paths.transition()
 			.ease("bounce")
 			.duration(1000)
@@ -657,19 +641,11 @@ SGPlotter.prototype = {
 	 * D: toggle the visibility of line graph
 	 * */
     toggleLine: function (show) {
-		var self=this;
+        if (show) 
+            this.svg.selectAll('.lines').attr('visibility', 'visible');
+        else 
+            this.svg.selectAll('.lines').attr('visibility', 'hidden');
         this.show_line= show;
-        if (this.show_line) {
-			self.svg.selectAll('.y2.axis').attr('visibility', 'visible');
-            self.svg.selectAll('.lines').attr('visibility', 'visible');
-            self.svg.selectAll('.right_region_label').attr('visibility', 'visible');
-        
-        }
-        else {
-            self.svg.selectAll('.lines').attr('visibility', 'hidden');
-            self.svg.selectAll('.right_region_label').attr('visibility', 'hidden');
-			self.svg.selectAll('.y2.axis').attr('visibility', 'hidden');
-		}
     },
 
 	/*
@@ -678,18 +654,12 @@ SGPlotter.prototype = {
 	 * D: toggle the visibility of bar graph
 	 * */
     toggleBar: function (show) {
-		var self=this;
+        if (show) 
+            this.svg.selectAll('.block').attr('visibility', 'visible');
+        else 
+            this.svg.selectAll('.block').attr('visibility', 'hidden');
+
         this.show_bar= show;
-        if (this.show_bar) {
-			self.svg.selectAll('.y1.axis').attr('visibility', 'visible');
-            self.svg.selectAll('.block').attr('visibility', 'visible');
-            self.svg.selectAll('.left_region_label').attr('visibility', 'visible');
-        }
-        else {
-			self.svg.selectAll('.y1.axis').attr('visibility', 'hidden');
-            self.svg.selectAll('.block').attr('visibility', 'hidden');
-            self.svg.selectAll('.left_region_label').attr('visibility', 'hidden');
-        }
     },
 
 	/*
@@ -833,22 +803,22 @@ SGPlotter.prototype = {
 			.attr('stroke-width', '0.5');
         
 		if (mode=='total') {
-			blocks.transition().duration(1000)
+			blocks.transition().duration(500)
 				.attr('height', function (d) {return self.y_coord(d.entries.length)})
 				.attr('y', function (d) {return self.y_coord(d.acc);});
-			blocks.transition().delay(1000).duration(1000)
+			blocks.transition().delay(500)
 				.attr('fill', function (d) {
 					var block_range = getValues(self.info[self.block_by]);
 					var block_val_idx = block_range.indexOf(d['block_by']);
 					var color = config.color(block_val_idx/block_range.length); 
-					return color;
+					return blockColor(d.block_by);
 			});
 		} else {
 			// mode unique
-			blocks.transition().duration(1000)
+			blocks.transition().duration(500)
 				.attr('height', function (d) { return self.y_coord(d.unique)})
 				.attr('y', 0); 
-			blocks.transition().delay(1000).duration(1000)
+			blocks.transition().delay(500)
 				.attr('fill', 'Olive'); 
 		}
 	}, 
@@ -869,32 +839,12 @@ SGPlotter.prototype = {
 				.text(function (bar) {return bar.unique.toFixed(2).replace(".00", "");})
 				.attr('transform', function (bar) {return  'scale(1,-1) translate('+(config.bar_margin+self.bar_width)/2+', '+(-self.y_coord(bar.unique)-10)+')';})
 		}
-		bar_label.transition().delay(500).attr('opacity', 1);
+		bar_label.transition().attr('opacity', 1);
+	},
+	postDraw: function () {
+		this.drawAverageLine();
 	}
 }
-
-/*
- * show loading animation
- * */
-/*
-var count=0;
-function loading() {
-	if (count==5) {
-        count=0;
-		self.svg.selectAll('text.comma').remove()
-	}
-	for (var i=0;i<count;i++) {
-		self.svg.select('#loading').append('svg:text').text('.').attr('class', 'comma').attr('dx', 90+ count*10).style('font-size', 30)
-	}
-	if (self.svg.select('#loading')[0][0]!=null) {
-		setTimeout('loading()', 300);
-	}
-	count++;
-}
-*/
-
-
-
 /*
  * N: getAverageRange
  * A: by, period; selected_bar, the curently selected bar object; data, reference to the data
@@ -942,4 +892,14 @@ function getAverageRange (by, selected_bar, data) {
 	return container;
 
 }
+var colors;
 
+function initBlockColor(plotter) {
+	var domain = getValues(plotter.info[plotter.block_by]);
+	colors = d3.scale.category20c();
+	colors.domain(domain);
+}
+
+function blockColor(d) {
+	return colors(d);
+}
