@@ -6,10 +6,11 @@ DataLoader.prototype = {
 	'loadRawData': function (path, time_by, time_by_domain, block_by) {
 		var data = this.loadData(path, time_by, time_by_domain, block_by);
 
-		if (data && this.validateRaw(data, time_by, time_by_domain, block_by)) return data;
-		else {
-			return false;
-		}
+		//if (data && this.validateRaw(data, time_by, time_by_domain, block_by)) return data;
+		//else {
+		//	return false;
+		//}
+		return data;
 	},
 
 	'loadData': function (path, time_by, time_by_domain, block_by) {

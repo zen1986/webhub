@@ -1,14 +1,3 @@
-/*
- * find textual information in info of input data
- * used in graph plotter
- * */
-function findInfo(field, value, info) {
-	for (var i=0;i<info.length;i++) {
-    	var e = info[i];
-        if (e[field]==value) return e;
-	}
-	return null;
-}
 
 // run test suit
 function runTest(suit, test_div) {
@@ -110,4 +99,21 @@ function lineValue(bar,idx_of_line) {
 		sum+=d3.sum(bar.blocks[i].entries, function (d) {return d[idx_of_line];});
 	}
 	return sum;
+}
+
+function getValues(obj)  {
+	var vals=[];
+	for (var i in obj) {
+		vals.push(obj[i]);
+	}
+	return vals;
+}
+
+function getUniqueLength(entries) {
+	var uniq_arr=[];
+	for (var i=0;i<entries.length;i++) {
+		var uid = entries[i][1];
+		if (uniq_arr.indexOf(uid)==-1) uniq_arr.push(uid);
+	}
+	return uniq_arr.length;
 }

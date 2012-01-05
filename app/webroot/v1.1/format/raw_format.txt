@@ -1,0 +1,47 @@
+Raw Data
+
+var: bar_by_domain // eg. ['hour', 'day', 'week', 'month']
+var: bar_by = one of bar_by_domain
+var: block_by = one of field value
+
+example: 
+{
+ "info": {
+		"cid": {                      // company ID
+			"1235":"seven 7",
+			"29384":"cheers"
+			"2938":"KFC"
+		},
+		"sid": {                      // store ID
+			"1232":"tampines",
+			"23":"dover",
+			"233":"bishan"
+		},
+		"aid": {                      // activity ID
+			"234":"snap and win",
+			"432":"scan and drink",
+			"384":"slip and gain"
+		},
+		"type": {
+			"0":"collection",
+			"1":"redemption"
+		}
+	},
+ "fields"	: ["time", "uid", "cid", "sid", "aid", "type", "points"],
+ "raw"		: [[345234, 345345, 1235, 1232, 234, 0, 234]]
+}
+
+
+explanation: 
+{
+'info'	: [ field object, ... ],
+'fields': [ field name, ... ],                        
+'raw'	: [ [entry], ... ]
+}
+
+info 			: an object of field object
+field object 	: it's a dictionary that a value can be queried from index of raw data with corresponding field
+field name		: an array of string. 
+raw				: an array of entry
+entry 			: each data in entry will be interpreted corresponding to the field name.  the 'time' field store the timestamp in unit of hour. 
+

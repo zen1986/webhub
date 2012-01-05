@@ -29,11 +29,11 @@ DataProcessor.prototype = {
 	},
     process: function (raw) {
 		var ret;
-		if (raw!=undefined && this.loader.validateRaw(raw, this.time_by, this.time_by_domain, this.block_by)) 
-			ret = process(raw, this.time_by, this.block_by, this.time_by_domain);
-		else if (this.loader.validateRaw(this.data, this.time_by, this.time_by_domain, this.block_by))
+		//if (raw!=undefined && this.loader.validateRaw(raw, this.time_by, this.time_by_domain, this.block_by)) 
+			//ret = process(raw, this.time_by, this.block_by, this.time_by_domain);
+		//else if (this.loader.validateRaw(this.data, this.time_by, this.time_by_domain, this.block_by))
 			ret = process(this.data, this.time_by, this.block_by, this.time_by_domain);
-		else return false;
+		//else return false;
 		return ret;
     }
 }
@@ -53,12 +53,13 @@ function process(raw, time_by, block_by, time_by_domain) {
         return e1[idx_bar_by] - e2[idx_bar_by];
     });
 
-	// reference key
-	var info_keys = Object.keys(data['info'][0]);
-	var ref_key = data['fields'].filter(function (x) {return info_keys.indexOf(x) !=-1})[0];
-	
-	// reference key index in fields
-	var ref_idx= data['fields'].indexOf(ref_key);
+	var block_by_idx = data['fields'].indexOf(block_by);
+	var use_info;
+	if (data['info'][block_by]==undefined)
+		use_info = false;
+	else 
+		use_info = true;
+
     var bar_objs= {}; 
 
     for (var i=0;i<raw.raw.length;i++) {
@@ -70,31 +71,21 @@ function process(raw, time_by, block_by, time_by_domain) {
             bar_objs[label]=new StackBar(time, label);
         }
 
-		var ref_value = entry[ref_idx];
-		var ref = findInfo(ref_key, ref_value, data['info']);
-		var block_by_value = ref[block_by];
+		var block_by_value;
+		var block_val_key = entry[block_by_idx];
+		block_by_value=data['info'][block_by][block_val_key];
+
         bar_objs[label].add(entry, block_by_value);
     }
 	// get bars array
-   	data['bars'] = getArray(bar_objs).sort(function (a, b) {return a.time - b.time;});	
+   	data['bars'] = getValues(bar_objs).sort(function (a, b) {return a.time - b.time;});	
 	data['bars'].map(function (bar) {bar.convertBlock();});
 	data['bar_by'] = time_by;
 	data['bar_by_domain']=time_by_domain;
 	data['block_by']=block_by;
-	data['ref_idx']=ref_idx;
-	data['block_levels'] = [];
-	// get unique block by values
-	data['info'].map(function (info) {if (data['block_levels'].indexOf(info[block_by]) == -1) data['block_levels'].push(info[block_by]);}); 
+	data['block_by_idx']=block_by_idx;
 
     return data;
-}
-
-function getArray(obj) {
-	var arr = [];
-	for (var i in obj) {
-		arr.push(obj[i]);
-	}
-	return arr;
 }
 
 function StackBar(time, label) {
@@ -115,13 +106,25 @@ StackBar.prototype = {
         this.count++;
     },
 	convertBlock: function () {
-		this.blocks = getArray(this.blocks);
-		var acc = 0;
+		this.blocks = getValues(this.blocks);
+		var acc = 0, unique_acc = 0, bar_unique=[];
 		this.blocks.sort(function (a,b) {return a.entries.length - b.entries.length;});
 		// add accumulated value
 		for (var i=0;i<this.blocks.length;i++) {
 			this.blocks[i]['acc'] = acc;
+			this.blocks[i]['unique_acc']= unique_acc;
 			acc+=this.blocks[i]['entries'].length;
+			unique_acc+=getUniqueLength(this.blocks[i]['entries']);
+			for (var j=0;j<this.blocks[i]['entries'].length;j++) {
+				var entry = this.blocks[i]['entries'][j];
+				if (bar_unique.indexOf(entry[1])==-1) {
+					bar_unique.push(entry[1]);
+				}
+			}
+		}
+		this.unique = bar_unique.length;
+		for (var i=0;i<this.blocks.length;i++) {
+			this.blocks[i].unique = this.unique;
 		}
 	}
 }

@@ -24,32 +24,27 @@
         </style>
 	</head>
 	<body>
-		<div class="loading"></div>
-		<div id="drawing_div"></div>
+		
+		<div id="drawing_area"></div>
 		<script>
-			var time_by_domain = ['hour', 'day', 'week', 'month'];
-			var time_by = 'day';
-			var block_by = 'region';
-			var p = new DataProcessor(time_by, time_by_domain, block_by);
-			var input = p.get('data.txt');
-			var output = p.process(input);
+			drawGraph('d1', ['hour', 'day', 'week', 'month'], 'day', 'sid', 'company.txt');
+			drawGraph('d2', ['hour', 'day', 'week', 'month'], 'day', 'sid', 'company.txt');
 
-			var plotter = new SGPlotter();
-			plotter.setData(output);
-			plotter.draw();
+			function drawGraph(id, t_domain, t_by, b_by, path) {
+				var setup="<div id='"+id+"'></div>";
+				$("#drawing_area").append(setup);
+				var p = new DataProcessor(t_by, t_domain, b_by, path);
+				var output = p.process();
+	
+				var plotter = new SGPlotter(id);
+				plotter.setData(output);
+				plotter.draw();
+	
+				//$("#"+id+"_unique").bind('click', function () {plotter.transformUniqueBar();});
+				//$("#"+id+"_total").bind('click', function () {plotter.transformTotalBar();});
+			}
 		</script>
 
-
-		<div>
-			<a href="test/test_processor.html">
-			<label>Test Processor</label>
-			</a>
-		</div>
-		<div>
-			<a href="test/test_graph.html">
-			<label>Test Graph</label>
-			</a>
-		</div>
 	</body>
 </html>
 
