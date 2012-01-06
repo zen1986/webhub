@@ -13,6 +13,13 @@ startTime = time.mktime(datetime.datetime(2011,11,28,11,0,0).timetuple())
 
 weekDayProb = [0.3,0.2,0.2,0.4,0.7,0.8,0.8]
 
+totalPerson = 100 
+totalDay = 30 
+totalEntries = 10000
+
+def randAttr(ids):
+	return int(ids[int(rand(len(ids)))])
+
 def probability(day, rep):
 	dayOfWeek = day%7
 	posOfDay = day*1.0/totalDay
@@ -21,22 +28,31 @@ def probability(day, rep):
 def getType():
 	return info['aid'].keys()[r.randint(0, 2)]
 
-totalPerson = 100 
-totalDay = 30 
+def rand(divisor=11, magnifier=100000): 
+	ret = int(r.random()*magnifier)%divisor
+	return ret
 
-def generateEntries():
-	for pid in range(totalPerson):
-		startDay = int(startTime)/3600 # in hour
-		for day in range(totalDay):
-			for sid in info['sid'].keys():
-				for cid in info['cid'].keys():
-					prob = probability(day, 1) 
-					for aid in  info['aid'].keys():
-						if prob > r.random():
-							hour = r.randint(0,7)
-							curTime = startDay+24*day+hour
-							entry = [curTime, pid, int(cid), int(sid), int(aid), int(getType()), int(r.random()*1000)] 
-							data['raw'].append(entry)
+
+def generateEntries(info):
+	sids = info['sid'].keys()
+	cids = info['cid'].keys()
+	aids = info['aid'].keys()
+	pids = range(totalPerson)
+	days = range(totalDay)
+
+	entryNum=0
+
+	startDay = int(startTime)/3600 # in hour
+	while entryNum<totalEntries:
+		day=int(rand(totalDay))
+		prob = probability(day, 1) 
+		chance = rand(1000)/1000.0
+		if prob > chance:
+			hour = int(r.random()*10000)%8
+			curTime = startDay+24*day+hour
+			entry = [curTime, int(pids[int(rand(totalPerson))]), randAttr(cids), randAttr(sids),randAttr(aids), int(getType()), int(r.random()*1000)] 
+			data['raw'].append(entry)
+			entryNum+=1
 
 # for the company
 info = {
@@ -46,7 +62,7 @@ info = {
 		"type": {"0": "collection", "1": "redemption"}
 		}
 
-generateEntries()
+generateEntries(info)
 data['info'] = info
 
 f = open('company.txt', 'w')
@@ -54,6 +70,7 @@ f.write(json.dumps(data))
 f.close()
 
 
+data['raw']=[]
 #for the store
 info = {
 		"cid": {"1": "seven 7"},
@@ -62,7 +79,7 @@ info = {
 		"type": {"0": "collection", "1": "redemption"}
 		}
 
-generateEntries()
+generateEntries(info)
 data['info'] = info
 
 f = open('store.txt', 'w')

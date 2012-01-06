@@ -111,10 +111,12 @@ StackBar.prototype = {
 		this.blocks.sort(function (a,b) {return a.entries.length - b.entries.length;});
 		// add accumulated value
 		for (var i=0;i<this.blocks.length;i++) {
+			var unique=getUniqueLength(this.blocks[i]['entries']);
 			this.blocks[i]['acc'] = acc;
 			this.blocks[i]['unique_acc']= unique_acc;
+			this.blocks[i]['unique']= unique;
 			acc+=this.blocks[i]['entries'].length;
-			unique_acc+=getUniqueLength(this.blocks[i]['entries']);
+			unique_acc+=unique;
 			for (var j=0;j<this.blocks[i]['entries'].length;j++) {
 				var entry = this.blocks[i]['entries'][j];
 				if (bar_unique.indexOf(entry[1])==-1) {
@@ -124,7 +126,7 @@ StackBar.prototype = {
 		}
 		this.unique = bar_unique.length;
 		for (var i=0;i<this.blocks.length;i++) {
-			this.blocks[i].unique = this.unique;
+			this.blocks[i].bar_unique = this.unique;
 		}
 	}
 }
