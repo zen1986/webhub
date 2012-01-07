@@ -1,50 +1,25 @@
+<!DOCTYPE HTML>
 <html>
-	<head>
-        <script type="text/javascript" src="./include/d3/d3.js"></script>
-        <script type="text/javascript" src="./include/d3/d3.layout.js"></script>
-		<script type="text/javascript" src="./include/date.format.js"></script>
-		<script type="text/javascript" src="./include/config.js"></script>
-		<script type="text/javascript" src="./include/data_loader.js"></script>
-		<script type="text/javascript" src="./include/common.js"></script>
-		<script type="text/javascript" src="./graph_plotter.js"></script>
-		<script type="text/javascript" src="./data_processor.js"></script>
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-		<style type="text/css">
-		.axis {
-			shape-rendering:crispEdges;
-		}
-		.axis path, .axis line {
-			fill:none;
-			stroke: #000;
-		}
-		.selected_bar>rect.bar_background {
-			fill:red;
-			opacity:0.2;
-		}
-        </style>
-	</head>
-	<body>
-		
-		<div id="drawing_area"></div>
-		<script>
-			drawGraph('d1', 'sid', 'company.txt', config1);
-			drawGraph('d2', 'aid', 'store.txt', config2);
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-			function drawGraph(id, b_by, path, conf) {
-				var setup="<button id='"+id+"_unique'>unique</button><button id='"+id+"_total'>total</button><div id='"+id+"'></div>";
-				$("#drawing_area").append(setup);
-				var p = new DataProcessor(conf.t_by, conf.t_domain, b_by, path);
-				var output = p.process();
-	
-				var plotter = new SGPlotter(id, conf);
-				plotter.setData(output);
-				plotter.draw();
-	
-				$("#"+id+"_unique").bind('click', function () {plotter.transformUniqueBar();});
-				$("#"+id+"_total").bind('click', function () {plotter.transformTotalBar();});
-			}
-		</script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script type="text/javascript" src="include/chart.base.js"></script>
+	<script type="text/javascript" src="include/d3/d3.js"></script>
+	<title>Graphs</title>
+</head>
+<body>
+	<div id="drawing_area"></div>
+	<ul>
+		<li><a href="stackgraph/stackgraph.html">stacked graph</a></li>
+		<li><a href="frequency/frequency.html">frequency graph</a></li>
+		<li><a href="treemap/treemap.html">treemap</a></li>
+	</ul>
 
-	</body>
+	<script>
+		var plotter = new ChartBase();
+		plotter.drawXAxis(100);
+		plotter.drawYAxis(100);
+	</script>
+</body>
 </html>
-

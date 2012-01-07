@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <script type="text/javascript" src="../include/chart.base.js"></script>
+        <script type="text/javascript" src="../include/d3/d3.js"></script>
+        <script type="text/javascript" src="../include/d3/d3.layout.js"></script>
+		<script type="text/javascript" src="./frequency.js"></script>
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<style type="text/css">
+		.axis {
+			shape-rendering:crispEdges;
+		}
+		.axis path, .axis line {
+			fill:none;
+			stroke: #000;
+		}
+        </style>
+	</head>
+	<body>
+		<script>
+			d3.json('data/frequency.txt', function (d) {
+				var conf = {
+					pad: [80,80,80,80],
+					chart_width: 800,
+					chart_height: 600	
+				};
+				var plotter = new FreqPlotter(d, conf);
+			});
+		</script>
+	</body>
+</html>
+
