@@ -1,18 +1,11 @@
 import json 
+import random as r
 
-data=[
-	[1,123],
-	[2,87],
-	[3,64],
-	[4,64],
-	[5,64],
-	[6,64],
-	[7,64],
-	[8,64],
-	[9,64],
-	[10,12]
-]
+data=[]
 
+for i in range(50):
+	d = [i, r.random()*1000]
+	data.append(d) 
 
 f = open('frequency.txt', 'w')
 f.write(json.dumps(data))
