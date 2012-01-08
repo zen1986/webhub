@@ -119,7 +119,7 @@ ChartBase.prototype = {
 				var dx;
 				switch (e.keyCode) {
 					case 39: // right key 
-						dx = 100;
+						dx = 600;
 						if (cbPrePos!=undefined && typeof cbPrePos== 'function') 
 							var pre = cbPrePos(self.vp_x);
 						else
@@ -127,7 +127,7 @@ ChartBase.prototype = {
 						self.vp_x= Math.min(self.draggable_width, pre);
 						break;
 					case 37: // left key 
-						dx = -100;
+						dx = -600;
 						if (cbNextPos!=undefined && typeof cbNextPos== 'function') 
 							var next = cbNextPos(self.vp_x);
 						else
@@ -138,7 +138,10 @@ ChartBase.prototype = {
 				self.svg.select('g.bars').transition().duration(500).attr('transform', 'translate(-'+self.vp_x+', 0)');
 
 				if (cbUpdate!=undefined && typeof cbUpdate== 'function') {
-					self._updateContainer(-dx, bars_width, bar_width, cbUpdate);
+					var ret=false;
+					while (!ret) {
+						ret = self._updateContainer(dx, bars_width, bar_width, cbUpdate);
+					}
 				}
 			});
 		});
@@ -159,13 +162,16 @@ ChartBase.prototype = {
 						d3.select(this).attr('transform', 'translate(-'+self.vp_x+', 0)');
 
 						if (cbUpdate!=undefined && typeof cbUpdate== 'function') {
-							self._updateContainer(d3.event.dx, bars_width, bar_width, cbUpdate);
+							var ret=false;
+							while (!ret) {
+								ret = self._updateContainer(d3.event.dx, bars_width, bar_width, cbUpdate);
+							};
 						}
 					}
 				)
 			);
 	},
-	_updateContainer: function (dx, bars_width, bar_width, cb) {
+	_updateContainer: function (dx, bars_width, bar_width, action) {
 		// viewport, container (adjacent bars with width spanning 3 viewport width) , bars
 		// consider leftmost coord x relative to bars, i.e. bars is static
 		// x will always be positive
@@ -187,30 +193,45 @@ ChartBase.prototype = {
 					else:
 						container move to left 
 		*/
+
+		if (bars_width< vp_width) return true;
+
 		var vp_x=this.vp_x, vp_width=this.config.chart_width;
 		var cont_width = vp_width*3;
 		var cont_x = this.cont_x;
 
-		if (bars_width< vp_width) return;
 
-		var right_bound = bars_width - ~~(2*cont_width/3)-dx;
-		var left_bound = ~~(cont_width/3)-dx;
+		var upper_bound= bars_width - ~~(2*cont_width/3);
+		var lower_bound= ~~(cont_width/3);
 
-		//console.log(' cont_x:'+cont_x+' vp_x:'+vp_x+' left_bound:'+left_bound+' right_bound:'+right_bound);
-		if (right_bound>=vp_x && left_bound<=vp_x) {
-			if (dx<0) {
-				var off = vp_x - cont_x- cont_width/3;
-				if (off>=bar_width && cont_x<=bars_width-cont_width) {
-					this.cont_x+=bar_width;
-					cb('push');
-				}
-			} else {
-				var off = cont_x + cont_width/3 - vp_x ;
-				if (off>=bar_width && cont_x>=0) {
-					this.cont_x-=bar_width;
-					cb('pop');
-				}
-			}
+		var off = vp_x - cont_x- cont_width/3;
+		
+		if (upper_bound<vp_x-dx || lower_bound>vp_x-dx) {
+			return true;
 		}
+		console.log(' cont_x:'+cont_x+' vp_x:'+vp_x+' lower_bound:'+lower_bound+' upper_bound:'+upper_bound);
+		//console.log('vp_x:'+vp_x+' cont_x:'+cont_x+' off:'+off);
+		if (Math.abs(off)<bar_width) return true;
+
+		if (off>=bar_width ) {
+			if (cont_x<=bars_width-cont_width) {
+				this.cont_x+=bar_width;
+				action('push');
+				return false;
+			} 
+			else 
+				return true;
+		}
+		else if (-off>=bar_width ) {
+			if (cont_x>=0) {
+				this.cont_x-=bar_width;
+				action('pop');
+				return false;
+			} 
+			else  
+				return true;
+		}
+		else 
+			return true;
 	}
 }
