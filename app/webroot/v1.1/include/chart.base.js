@@ -24,6 +24,7 @@ function ChartBase(conf) {
 	this.vp_x=0;
 	this.cont_x=0;
 	this.acc_move=0;
+	this.max_dx=0;
 	this.id = new Date().getTime();
 	this.init();
 }
@@ -43,7 +44,7 @@ ChartBase.prototype = {
 			$('body').prepend('<div id=\'drawing_area\'></div>');
 
 		// the svg
-		this.svg = d3.select('#drawing_area').append('svg:svg').attr('id', id+'_svg').attr('width', svg_width).attr('height', svg_height);;
+		this.svg = d3.select('#drawing_area').append('svg:svg').attr('id', id+'_svg').attr('width', svg_width).attr('height', svg_height);
 
 		this.canvas = this.svg.append('svg:g').attr('class', 'canvas').attr('transform', 'translate('+conf.pad[3]+', '+conf.pad[0]+')');
 		// put mask on canvas
@@ -140,7 +141,7 @@ ChartBase.prototype = {
 				var dx, old_vp=self.vp_x;
 				switch (e.keyCode) {
 					case 39: // right key 
-						dx = 123;
+						dx = 200;
 						if (cbPrevPos!=undefined && typeof cbPrevPos== 'function') 
 							var pre = cbPrevPos.call(ctx, self.vp_x);
 						else
@@ -148,7 +149,7 @@ ChartBase.prototype = {
 						self.vp_x= Math.min(self.draggable_width, pre);
 						break;
 					case 37: // left key 
-						dx = -123;
+						dx = -200;
 						if (cbNextPos!=undefined && typeof cbNextPos== 'function') 
 							var next = cbNextPos.call(ctx, self.vp_x);
 						else
@@ -161,7 +162,7 @@ ChartBase.prototype = {
 				if (cbUpdate!=undefined && typeof cbUpdate== 'function') {
 					var ret=false;
 					while (!ret) {
-						ret = self._updateContainer(old_vp, bars_width, bar_width, cbUpdate, ctx);
+						ret = self._updateContainer(old_vp-self.vp_x, bars_width, bar_width, cbUpdate, ctx);
 					}
 				}
 			});
@@ -186,7 +187,7 @@ ChartBase.prototype = {
 						if (cbUpdate!=undefined && typeof cbUpdate== 'function') {
 							var ret=false;
 							while (!ret) {
-								ret = self._updateContainer(old_vp, bars_width, bar_width, cbUpdate, ctx);
+								ret = self._updateContainer(d3.event.dx, bars_width, bar_width, cbUpdate, ctx);
 							};
 						}
 					}
@@ -205,7 +206,7 @@ ChartBase.prototype = {
 	 * update container position according to viewport's position
 	 * call push/pop action
 	 * */
-	_updateContainer: function (old_vp, bars_width, bar_width, action, ctx) {
+	_updateContainer: function (dx, bars_width, bar_width, action, ctx) {
 	    // viewport, container (adjacent bars with width spanning 3 viewport width) , bars
 		// consider leftmost coord x relative to bars, i.e. bars is static
 		// all x will be positive
@@ -213,6 +214,7 @@ ChartBase.prototype = {
 		
 		if (bars_width <= vp_width) return true;
 
+		this.max_dx = Math.max(Math.abs(dx), this.max_dx);
 		var vp_x=this.vp_x, vp_width=this.config.chart_width;
 		var cont_width = vp_width*3;
 		var cont_x = this.cont_x;
@@ -221,19 +223,19 @@ ChartBase.prototype = {
 		var upper_bound= bars_width - ~~(2*cont_width/3);
 		var lower_bound= ~~(cont_width/3);
 
-		if (upper_bound<old_vp) {
-			cont_x = 0;
+		//console.log(' cont_x:'+cont_x+' old_vp:'+old_vp+' lower_bound:'+lower_bound+' upper_bound:'+upper_bound);
+		if (upper_bound<vp_x && upper_bound>vp_x+dx) {
+			cont_x = bars_width - cont_width;
 			return true;
 		}
-		if (lower_bound>old_vp) {
-			cont_x = bars_width - cont_width;
+		if (lower_bound>vp_x && lower_bound<vp_x+dx) {
+			cont_x = 0;
 			return true;
 		}
 
 		// within the bound the vp_x is at roughly 1/3 cont pos after cont_x
 		var off = vp_x - cont_x- vp_width;
 
-		//console.log(' cont_x:'+cont_x+' vp_x:'+vp_x+' lower_bound:'+lower_bound+' upper_bound:'+upper_bound);
 		if (Math.abs(off)<bar_width/2) return true;
 
 		// cont_x is before the position
