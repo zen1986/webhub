@@ -54,6 +54,11 @@ def generateEntries(info):
 			data['raw'].append(entry)
 			entryNum+=1
 
+def save(path):
+	f = open(path, 'w')
+	f.write(json.dumps(data))
+	f.close()
+
 # for the company
 info = {
 		"cid": {"1": "seven 7"},
@@ -64,10 +69,7 @@ info = {
 
 generateEntries(info)
 data['info'] = info
-
-f = open('company.txt', 'w')
-f.write(json.dumps(data))
-f.close()
+save('company.txt')
 
 
 data['raw']=[]
@@ -82,14 +84,5 @@ info = {
 generateEntries(info)
 data['info'] = info
 
-f = open('store.txt', 'w')
-f.write(json.dumps(data))
-f.close()
-
-info = {
-		"cid": {"1": "seven 7", "2":"epicenter", "3":"amazon"},
-		"sid": {"1": "Jurong East Mall", "2":"tampanies", "3":"Clementi", "4":"Jurong West", "5":"Bishan", "6":"Java", "7":"C++", "8":"Chinese", "9":"Japanese", "10":"C#", "11":"Actionscript", "12":"Oracle"},
-		"aid": {"1": "Snap and win", "2":"Scan and drink", "3": "Slip and gain"},
-		"type": {"0": "collection", "1": "redemption"}
-		}
+save('store.txt')
 
