@@ -119,7 +119,7 @@ ChartBase.prototype = {
 				var dx;
 				switch (e.keyCode) {
 					case 39: // right key 
-						dx = 600;
+						dx = 123;
 						if (cbPrePos!=undefined && typeof cbPrePos== 'function') 
 							var pre = cbPrePos(self.vp_x);
 						else
@@ -127,7 +127,7 @@ ChartBase.prototype = {
 						self.vp_x= Math.min(self.draggable_width, pre);
 						break;
 					case 37: // left key 
-						dx = -600;
+						dx = -123;
 						if (cbNextPos!=undefined && typeof cbNextPos== 'function') 
 							var next = cbNextPos(self.vp_x);
 						else
@@ -171,50 +171,46 @@ ChartBase.prototype = {
 				)
 			);
 	},
+	/*
+	 * update container position according to viewport's position
+	 * call push/pop action
+	 * */
 	_updateContainer: function (dx, bars_width, bar_width, action) {
-		// viewport, container (adjacent bars with width spanning 3 viewport width) , bars
+	    // viewport, container (adjacent bars with width spanning 3 viewport width) , bars
 		// consider leftmost coord x relative to bars, i.e. bars is static
-		// x will always be positive
+		// all x will be positive
 		// at beginning, viewport's x and container's x in container overlap at 0 
-		/*
-			if bars width<viewport width
-				return
-
-			if viewport's x < 0 or viewport's x >= bars width - 1/3 container width:	return
-
-			if right key pressed:
-				viewport's x += dx
-			else 
-				viewport's x -= dx
-
-				if bars width - 2/3 container width>viewport's x >= 1/3 of container: 
-					if right key: 
-						container move to right
-					else:
-						container move to left 
-		*/
-
-		if (bars_width< vp_width) return true;
+		
+		if (bars_width < vp_width) return true;
 
 		var vp_x=this.vp_x, vp_width=this.config.chart_width;
 		var cont_width = vp_width*3;
 		var cont_x = this.cont_x;
 
-
+		// bound rang within which the container position should be updated
 		var upper_bound= bars_width - ~~(2*cont_width/3);
 		var lower_bound= ~~(cont_width/3);
 
-		var off = vp_x - cont_x- cont_width/3;
-		
-		if (upper_bound<vp_x-dx || lower_bound>vp_x-dx) {
+		if (upper_bound<vp_x-dx) {
+			cont_x = 0;
 			return true;
 		}
-		console.log(' cont_x:'+cont_x+' vp_x:'+vp_x+' lower_bound:'+lower_bound+' upper_bound:'+upper_bound);
-		//console.log('vp_x:'+vp_x+' cont_x:'+cont_x+' off:'+off);
-		if (Math.abs(off)<bar_width) return true;
+		if (lower_bound>vp_x-dx) {
+			cont_x = bars_width - cont_width;
+			return true;
+		}
 
-		if (off>=bar_width ) {
-			if (cont_x<=bars_width-cont_width) {
+		// within the bound the vp_x is at roughly 1/3 cont pos after cont_x
+		var off = vp_x - cont_x- cont_width/3;
+
+		console.log(' cont_x:'+cont_x+' vp_x:'+vp_x+' lower_bound:'+lower_bound+' upper_bound:'+upper_bound);
+		if (Math.abs(off)<bar_width/2) return true;
+
+		// cont_x is before the position
+		if (off>=bar_width/2) {
+			if (cont_x<bars_width-cont_width) {
+				// push it to right
+				// update it's position by one bar width
 				this.cont_x+=bar_width;
 				action('push');
 				return false;
@@ -222,8 +218,11 @@ ChartBase.prototype = {
 			else 
 				return true;
 		}
-		else if (-off>=bar_width ) {
-			if (cont_x>=0) {
+		// cont_x is after the position
+		else if (-off>=bar_width/2) {
+			if (cont_x>0) {
+				// push it to left 
+				// update it's position by one bar width
 				this.cont_x-=bar_width;
 				action('pop');
 				return false;
