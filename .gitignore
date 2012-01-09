@@ -1,3 +1,4 @@
+.htaccess
 *.[a-zA-Z]*~
 /app/Config
 /app/tmp

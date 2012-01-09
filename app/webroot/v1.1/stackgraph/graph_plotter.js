@@ -78,8 +78,6 @@ SGPlotter.prototype = {
         this.labels = this.svg.append('svg:g').attr('class', 'labels');
 
 		this.popup_main = this.svg.append('svg:g').attr('class', 'popup_main').attr('transform', 'translate('+this.config.pad[3]+', 0)');
-
- 
 	},
 
 	/*
@@ -416,7 +414,7 @@ SGPlotter.prototype = {
 			.attr('fill', this.config.background_color)
 
 		left.append('svg:g').attr('class', 'y1 axis block').attr('transform', 'translate('+(this.config.pad[3])+','+(this.config.pad[0])+')');
-		this._renderY1Axis(this.mode);
+		this._renderY1exis(this.mode);
         
         // title on the left
         left.append('svg:text')
