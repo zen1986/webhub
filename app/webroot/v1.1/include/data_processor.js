@@ -6,10 +6,11 @@
  * data_loader.js
  **/
  
-function DataProcessor(time_by, time_by_domain, block_by, path) {
+function DataProcessor(time_by, time_by_domain, block_by, line_by, path) {
 	this.time_by = time_by;
 	this.time_by_domain = time_by_domain;
 	this.block_by = block_by;
+	this.line_by = line_by;
 	this.loader = new DataLoader();
 	if (path!=undefined) {
 		this.path = path;
@@ -30,16 +31,18 @@ DataProcessor.prototype = {
     process: function (raw) {
 		var ret;
 		//if (raw!=undefined && this.loader.validateRaw(raw, this.time_by, this.time_by_domain, this.block_by)) 
-			//ret = process(raw, this.time_by, this.block_by, this.time_by_domain);
+		if (raw!=undefined) 
+			ret = process(raw, this.time_by, this.block_by, this.time_by_domain, this.line_by);
 		//else if (this.loader.validateRaw(this.data, this.time_by, this.time_by_domain, this.block_by))
-			ret = process(this.data, this.time_by, this.block_by, this.time_by_domain);
+		else
+			ret = process(this.data, this.time_by, this.block_by, this.time_by_domain, this.line_by);
 		//else return false;
 		return ret;
     }
 }
 
 
-function process(raw, time_by, block_by, time_by_domain) {
+function process(raw, time_by, block_by, time_by_domain, line_by) {
     var data={}; // return data
     data['fields'] = raw['fields'];
     data['info'] = raw['info'];
@@ -77,9 +80,10 @@ function process(raw, time_by, block_by, time_by_domain) {
 
         bar_objs[label].add(entry, block_by_value);
     }
+	var line_idx = data['fields'].indexOf(line_by);
 	// get bars array
    	data['bars'] = getValues(bar_objs).sort(function (a, b) {return a.time - b.time;});	
-	data['bars'].map(function (bar) {bar.convertBlock();});
+	data['bars'].map(function (bar) {bar.convertBlock(line_idx);});
 	data['bar_by'] = time_by;
 	data['bar_by_domain']=time_by_domain;
 	data['block_by']=block_by;
@@ -105,9 +109,10 @@ StackBar.prototype = {
         this.blocks[block_by_value].entries.push(entry);
         this.count++;
     },
-	convertBlock: function () {
+	convertBlock: function (idx_of_line) {
 		this.blocks = getValues(this.blocks);
 		var acc = 0, unique_acc = 0, bar_unique=[];
+		var line_val = 0;
 		this.blocks.sort(function (a,b) {return a.entries.length - b.entries.length;});
 		// add accumulated value
 		for (var i=0;i<this.blocks.length;i++) {
@@ -123,7 +128,9 @@ StackBar.prototype = {
 					bar_unique.push(entry[1]);
 				}
 			}
+			line_val+=d3.sum(this.blocks[i]['entries'], function (d) {return d[idx_of_line]});
 		}
+		this.line_val = line_val;
 		this.unique = bar_unique.length;
 		for (var i=0;i<this.blocks.length;i++) {
 			this.blocks[i].bar_unique = this.unique;

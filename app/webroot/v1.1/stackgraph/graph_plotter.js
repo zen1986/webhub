@@ -922,6 +922,5 @@ SGPlotter.prototype = {
 		}
 		return container;
 	}
-
 }
 

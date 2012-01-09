@@ -1,0 +1,15 @@
+div#drawing_area {
+	margin-left: 100px;
+}
+.axis {
+	shape-rendering:crispEdges;
+}
+.axis path, .axis line {
+	fill:none;
+	stroke: #000;
+}
+.selected_bar>rect.bar_background {
+	fill:red;
+	opacity:0.2;
+}
+   
