@@ -1,5 +1,5 @@
 {
- "name": "flare",
+ "name": "all",
  "children": [
   {
    "name": "7-eleven",
@@ -20,6 +20,76 @@
    "children": [
     {"name": "collect", "size": 50},
     {"name": "redeem", "size": 87}
+   ]
+  },
+  {
+   "name": "challengers",
+   "children": [
+    {"name": "collect", "size": 12},
+    {"name": "redeem", "size": 150}
+   ]
+  },
+  {
+   "name": "challengers",
+   "children": [
+    {"name": "collect", "size": 12},
+    {"name": "redeem", "size": 150}
+   ]
+  },
+  {
+   "name": "challengers",
+   "children": [
+    {"name": "collect", "size": 12},
+    {"name": "redeem", "size": 150}
+   ]
+  },
+  {
+   "name": "challengers",
+   "children": [
+    {"name": "collect", "size": 12},
+    {"name": "redeem", "size": 150}
+   ]
+  },
+  {
+   "name": "challengers",
+   "children": [
+    {"name": "collect", "size": 12},
+    {"name": "redeem", "size": 150}
+   ]
+  },
+  {
+   "name": "challengers",
+   "children": [
+    {"name": "collect", "size": 12},
+    {"name": "redeem", "size": 150}
+   ]
+  },
+  {
+   "name": "challengers",
+   "children": [
+    {"name": "collect", "size": 12},
+    {"name": "redeem", "size": 150}
+   ]
+  },
+  {
+   "name": "challengers",
+   "children": [
+    {"name": "collect", "size": 12},
+    {"name": "redeem", "size": 150}
+   ]
+  },
+  {
+   "name": "challengers",
+   "children": [
+    {"name": "collect", "size": 12},
+    {"name": "redeem", "size": 150}
+   ]
+  },
+  {
+   "name": "challengers",
+   "children": [
+    {"name": "collect", "size": 12},
+    {"name": "redeem", "size": 150}
    ]
   },
   {

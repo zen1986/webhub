@@ -9,7 +9,7 @@
 <h3>graph and testing page</h3>
 <a href="http://zvaya.com/cp2/app/webroot/v1.1/">http://zvaya.com/cp2/v1.1/</a>
 <h3>todo list</h3>
-<a href="http://zvaya.com/cp2/app/webroot/v1.1/todo.txt">todo list</a>
+<a href="http://zvaya.com/cp2/app/webroot/v1.1/doc/todo.txt">todo list</a>
 <h3>iMobble Facebook Page</h3>
 <a href="http://www.facebook.com/pages/Mobble/276709152366261?sk=app_252054341517974">http://www.facebook.com/pages/Mobble/276709152366261?sk=app_252054341517974</a>
 <h3>iMobble Webpage</h3>

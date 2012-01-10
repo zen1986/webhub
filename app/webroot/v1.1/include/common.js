@@ -117,3 +117,29 @@ function getUniqueLength(entries) {
 	}
 	return uniq_arr.length;
 }
+
+function Composition(target, source) {
+	var desc = Object.getOwnPropertyDescriptor;
+	var prop = Object.getOwnPropertyNames;
+	var def_prop = Object.defineProperty;
+
+	prop(source).forEach(
+			function(key) {
+				def_prop(target, key, desc(source, key));
+			});
+	return target;
+}
+
+function inherit(src, to) {
+	var base = new src();
+	
+	// inherit properties
+	Composition(to, base);
+
+	// inherit methods
+	var proto =Object.getPrototypeOf(base);
+
+	for (var p in proto) {
+		to[p] = proto[p];
+	}
+}
