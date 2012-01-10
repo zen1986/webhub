@@ -1,7 +1,7 @@
 // frequency bar chart
 
 function FreqPlotter(d, conf) {
-	this.data = d;
+	this.data = d.sort(function (a,b) {return b[1]-a[1];});
 	this.base = new ChartBase(conf);
 
 	this.container = [];
@@ -12,6 +12,7 @@ function FreqPlotter(d, conf) {
 	this.draw();
 	this.setEvents();
 	this.drawLabels();
+
 	// focus on the graph
 	$('#'+this.base.id+'_svg').trigger('click');
 } 
@@ -109,7 +110,7 @@ FreqPlotter.prototype = {
 			self.draw();
 		}
 		base.setDrag(draggable_width, self.bar_width*self.data.length, self.bar_width, updateContainer);
-		base.setKeydown(self.bar_width*self.data.length, self.bar_width, updateContainer);
+		base.setKeydown(self.bar_width*self.data.length, self.bar_width, 1000, updateContainer);
 	},
 	drawLabels: function () {
 		var self = this;

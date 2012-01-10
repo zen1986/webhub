@@ -26,11 +26,11 @@ function ChartBase(conf) {
 	this.acc_move=0;
 	this.max_dx=0;
 	this.id = new Date().getTime();
-	this.init();
+	this._init();
 }
 
 ChartBase.prototype = {
-	init: function () {
+	_init: function () {
 		// create svg
 		// chart area
 		// label area
@@ -70,9 +70,9 @@ ChartBase.prototype = {
 	drawYAxis: function (max) {
 		var conf = this.config;
 		var labels= this.labels;
-		var y_scale = this.y_scale = d3.scale.linear().range([conf.chart_height, 0]).domain([0, max]);
-		var y_axis = d3.svg.axis().scale(y_scale).orient('left');
-		labels.append('svg:g').attr('class', 'y axis block').attr('transform', 'translate('+conf.pad[3]+', '+conf.pad[0]+')').call(y_axis);
+		var y_scale = this.y_scale = d3.scale.linear().range([0, conf.chart_height]);
+		this.y_axis = d3.svg.axis().scale(y_scale).orient('left');
+		labels.append('svg:g').attr('class', 'y axis block').attr('transform', 'translate('+conf.pad[3]+', '+conf.pad[0]+')');
 	},
 	drawLineAxis: function (max) {
 		var conf = this.config;
@@ -129,7 +129,7 @@ ChartBase.prototype = {
 		}
 
 	},
-	setKeydown: function (bars_width, bar_width, cbUpdate, cbPrevPos, cbNextPos,  ctx) {
+	setKeydown: function (bars_width, bar_width, default_page, cbUpdate, cbPrevPos, cbNextPos,  ctx) {
 		var self = this;
 		var svgId ='#'+self.id+'_svg';
 		$(svgId).unbind("focus").bind("focus", function() {
@@ -141,7 +141,7 @@ ChartBase.prototype = {
 				var dx, old_vp=self.vp_x;
 				switch (e.keyCode) {
 					case 39: // right key 
-						dx = 200;
+						dx = default_page;
 						if (cbPrevPos!=undefined && typeof cbPrevPos== 'function') 
 							var pre = cbPrevPos.call(ctx, self.vp_x);
 						else
@@ -149,7 +149,7 @@ ChartBase.prototype = {
 						self.vp_x= Math.min(self.draggable_width, pre);
 						break;
 					case 37: // left key 
-						dx = -200;
+						dx = -default_page;
 						if (cbNextPos!=undefined && typeof cbNextPos== 'function') 
 							var next = cbNextPos.call(ctx, self.vp_x);
 						else
@@ -202,12 +202,12 @@ ChartBase.prototype = {
 			callback(self.selected);
 		});
 	},
-	/*
-	 * update container position according to viewport's position
-	 * call push/pop action
-	 * */
 	_updateContainer: function (dx, bars_width, bar_width, action, ctx) {
-	    // viewport, container (adjacent bars with width spanning 3 viewport width) , bars
+		/*
+		 * update container position according to viewport's position
+		 * call push/pop action
+		 * */
+		// viewport, container (adjacent bars with width spanning 3 viewport width) , bars
 		// consider leftmost coord x relative to bars, i.e. bars is static
 		// all x will be positive
 		// at beginning, viewport's x and container's x in container overlap at 0 

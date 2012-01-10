@@ -14,12 +14,12 @@
 	</head>
 	<body>
 		<script>
-			d3.json('data/footfall.txt', function (d) {
+			d3.json('data/company.txt', function (d) {
 				var conf = {
 					pad: [80,380,80,80],
 					chart_width: 800,
 					chart_height: 400,	
-					chart_title: "Footfall Graph",
+					chart_title: "7-Eleven Footfall Graph",
 					chart_left_title: "Count",
 					chart_right_title: "Points",
 					chart_bottom_title: "Time",
@@ -35,6 +35,28 @@
 				var data = proc.process(d);
 				new FootfallPlotter(data, conf);
 			});
+			d3.json('data/store.txt', function (d) {
+				var conf = {
+					pad: [80,380,80,80],
+					chart_width: 800,
+					chart_height: 400,	
+					chart_title: "Tampines Store Footfall Graph",
+					chart_left_title: "Count",
+					chart_right_title: "Points",
+					chart_bottom_title: "Time",
+					show_bar: true,
+					show_line: true,
+					bar_color: 'blue',
+					line_color: 'purple',
+					background_color: 'white',
+					average_line_by: 'ow',
+					unique_color: 'brown',
+				};
+				var proc = new DataProcessor('day', ['hour','day'], 'aid', 'points');
+				var data = proc.process(d);
+				new FootfallPlotter(data, conf);
+			});
+
 		</script>
 	</body>
 </html>

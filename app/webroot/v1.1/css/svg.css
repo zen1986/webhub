@@ -12,4 +12,7 @@ div#drawing_area {
 	fill:red;
 	opacity:0.2;
 }
+svg {
+	margin-top: 100px;
+}
    
