@@ -130,8 +130,8 @@ function Composition(target, source) {
 	return target;
 }
 
-function inherit(src, to) {
-	var base = new src();
+function inherit(src, to, args) {
+	var base = new src(args);
 	
 	// inherit properties
 	Composition(to, base);

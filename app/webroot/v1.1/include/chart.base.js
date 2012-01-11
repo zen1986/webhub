@@ -20,16 +20,24 @@ function ChartBase(conf) {
 	else
 		this.config = conf;
 
-	// bars pos relative to viewport, always -ve
-	this.vp_x=0;
-	this.cont_x=0;
-	this.acc_move=0;
-	this.max_dx=0;
 	this.id = new Date().getTime();
+
+	if ($('#drawing_area').length == 0)
+		$('body').prepend('<div id=\'drawing_area\'></div>');
+
+	this.div = d3.select('#drawing_area').append('div').attr('id', this.id);
+	this._clear();
 	this._init();
 }
 
 ChartBase.prototype = {
+	_clear: function () {
+		// bars pos relative to viewport, always -ve
+		this.vp_x=0;
+		this.cont_x=0;
+		this.acc_move=0;
+		this.max_dx=0;
+	},
 	_init: function () {
 		// create svg
 		// chart area
@@ -40,11 +48,9 @@ ChartBase.prototype = {
 		var svg_width = this.svg_width = conf.chart_width+conf.pad[3]+conf.pad[1];
 		var svg_height= this.svg_height = conf.chart_height+conf.pad[0]+conf.pad[2];
 
-		if ($('#drawing_area').length == 0)
-			$('body').prepend('<div id=\'drawing_area\'></div>');
-
+		$('#'+id).css('width', svg_width);
 		// the svg
-		this.svg = d3.select('#drawing_area').append('svg:svg').attr('id', id+'_svg').attr('width', svg_width).attr('height', svg_height);
+		this.svg = this.div.append('svg:svg').attr('id', id+'_svg').attr('width', svg_width).attr('height', svg_height);
 
 		this.canvas = this.svg.append('svg:g').attr('class', 'canvas').attr('transform', 'translate('+conf.pad[3]+', '+conf.pad[0]+')');
 		// put mask on canvas
@@ -59,37 +65,45 @@ ChartBase.prototype = {
 
 		// the labels
 		this.labels = this.svg.append('svg:g').attr('class', 'labels');
+
 	},
-	drawXAxis: function (max) {
+	setupXAxis: function (max) {
 		var conf = this.config;
 		var labels = this.labels;
 		var x_scale= this.x_scale = d3.scale.linear().range([0, conf.chart_width]).domain([0, max]);
-		var x_axis = d3.svg.axis().scale(x_scale).orient('bottom');
-		labels.append('svg:g').attr('class', 'x axis').attr('transform', 'translate('+conf.pad[3]+', '+(conf.pad[0]+conf.chart_height)+')').call(x_axis);
+		var x_axis = this.x_axis = d3.svg.axis().scale(x_scale).orient('bottom').tickSubdivide(0).tickFormat(d3.format(".0f"));
+		labels.append('svg:g').attr('class', 'x axis').attr('transform', 'translate('+conf.pad[3]+', '+(conf.pad[0]+conf.chart_height)+')');
 	}, 
-	drawYAxis: function (max) {
+	setupYAxis: function (max) {
 		var conf = this.config;
 		var labels= this.labels;
 		var y_scale = this.y_scale = d3.scale.linear().range([0, conf.chart_height]);
-		this.y_axis = d3.svg.axis().scale(y_scale).orient('left');
+		this.y_axis = d3.svg.axis().scale(y_scale).orient('left').ticks(5);
 		labels.append('svg:g').attr('class', 'y axis block').attr('transform', 'translate('+conf.pad[3]+', '+conf.pad[0]+')');
 	},
-	drawLineAxis: function (max) {
+	setupLineAxis: function (max) {
 		var conf = this.config;
 		var labels= this.labels;
 		var line_scale = this.line_scale = d3.scale.linear().range([conf.chart_height, 0]).domain([0, max]);
-		var line_axis = d3.svg.axis().scale(line_scale).orient('right');
+		var line_axis = d3.svg.axis().scale(line_scale).orient('right').ticks(5);
 		labels.append('svg:g').attr('class', 'line axis').attr('transform', 'translate('+(conf.chart_width+conf.pad[3])+', '+conf.pad[0]+')').call(line_axis);
 	},
-	drawGraph: function () {
+	setupGraph: function () {
 		var conf = this.config;
 		var canvas = this.canvas;
 
 		// new coordinate system of the graph
 		this.graph = canvas.append('svg:g').attr('class', 'graph').attr('transform', 'scale(1,-1) translate(0, -'+conf.chart_height+')');
 		this.g_bars = this.graph.append('svg:g').attr('class', 'bars');
+
+		// the marker
+		this.marker = this.graph.append('svg:line')
+			.attr('x1', 0).attr('y1', conf.chart_width)
+			.attr('x2', conf.chart_width).attr('y2', conf.chart_width)
+			.attr('stroke', 'red').attr('opacity', 0.4).attr('stroke-width', 1);
+
 	},
-	drawLabels: function() {
+	setupLabels: function() {
 		var self = this;
 		var conf = self.config;
 		var labels = self.labels;
@@ -129,7 +143,7 @@ ChartBase.prototype = {
 		}
 
 	},
-	setKeydown: function (bars_width, bar_width, default_page, cbUpdate, cbPrevPos, cbNextPos,  ctx) {
+	setupKeydown: function (bars_width, bar_width, default_page, cbUpdate, cbPrevPos, cbNextPos,  ctx) {
 		var self = this;
 		var svgId ='#'+self.id+'_svg';
 		$(svgId).unbind("focus").bind("focus", function() {
@@ -170,7 +184,7 @@ ChartBase.prototype = {
 		$(svgId).unbind("click").bind("click", function () {$(this).focus();});
 		
 	},
-	setDrag: function (draggable_width, bars_width, bar_width, cbUpdate, ctx) {
+	setupDrag: function (draggable_width, bars_width, bar_width, cbUpdate, ctx) {
 		var self = this;
 		self.draggable_width = draggable_width;
 		this.svg.select('g.bars')
@@ -194,12 +208,22 @@ ChartBase.prototype = {
 				)
 			);
 	},
-	setClick: function (callback) {
+	setupClick: function (callback) {
 		var self = this;
 		var id = this.id+'_svg';
 		$('#'+id+' g.bar').unbind('click').bind('click', function () {
 			self.selected= d3.select(this);
 			callback(self.selected);
+		});
+	},
+	setupMarkerEvent: function (callback) {
+		var self = this;
+		var id = this.id+'_svg';
+		$('#'+id+' g.bar').unbind('hover').bind('hover', function () {
+			var y = callback.call(this);
+			self.svg.select('rect.highlighted').classed('highlighted', '').attr('fill', 'blue');
+			d3.select(this).selectAll('rect').classed('highlighted', true);
+			self.drawMarker(y);
 		});
 	},
 	_updateContainer: function (dx, bars_width, bar_width, action, ctx) {
@@ -264,5 +288,8 @@ ChartBase.prototype = {
 		}
 		else 
 			return true;
-	}
+	},
+	drawMarker: function (y) {
+		this.marker.transition().delay(0).duration(500).attr('y1', y).attr('y2', y);
+	},
 }

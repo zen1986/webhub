@@ -31,9 +31,7 @@
 					average_line_by: 'ow',
 					unique_color: 'brown',
 				};
-				var proc = new DataProcessor('day', ['hour','day'], 'sid', 'points');
-				var data = proc.process(d);
-				new FootfallPlotter(data, conf);
+				new FootfallPlotter(d, conf, 'sid', 'points');
 			});
 			d3.json('data/store.txt', function (d) {
 				var conf = {
@@ -52,9 +50,7 @@
 					average_line_by: 'ow',
 					unique_color: 'brown',
 				};
-				var proc = new DataProcessor('day', ['hour','day'], 'aid', 'points');
-				var data = proc.process(d);
-				new FootfallPlotter(data, conf);
+				new FootfallPlotter(d, conf, 'aid', 'points');
 			});
 
 		</script>

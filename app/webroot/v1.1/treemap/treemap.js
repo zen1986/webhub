@@ -3,7 +3,6 @@
 
 function TreemapPlotter() {
 	inherit(TreemapBase, this);
-
 }
 
 

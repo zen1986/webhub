@@ -3,7 +3,7 @@ import random as r
 
 data=[]
 
-for i in range(500):
+for i in range(120):
 	d = [i+1, r.random()*1000]
 	data.append(d) 
 

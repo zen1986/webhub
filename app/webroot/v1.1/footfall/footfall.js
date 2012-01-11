@@ -1,49 +1,70 @@
 // foot fall chart
-function FootfallPlotter(d, conf) {
-	this.data = d['bars'];
-	this.info = d['info'];
-	this.fields=d['fields'];
-	this.block_by =d['block_by'];
-	this.block_by_idx=d['block_by_idx'];
-	this.bar_by = d['bar_by'];
-
+function FootfallPlotter(data, conf, block_by, line_by) {
+	this.setData(data, 'day', ['hour', 'day'], block_by, line_by);
+	
 	// total or unique
 	this.mode = 'total';
-	this.base = new ChartBase(conf);
+
+	// inherit from chartbase
+	inherit(ChartBase, this, conf);
 
 	// for control scroll
 	this.container = [];
 	this.cont_tail = 0;
 
-	this.init();
-	this.makeController();
-	this.draw();
-	
-	this.setEvents();
-	this.drawLabels();
+	this.reDraw();
 
-	// focus on the graph
-	$('#'+this.base.id+'_svg').trigger('click');
 } 
 
 FootfallPlotter.prototype = {
+	setData: function (data, bar_by, bar_by_domain, block_by, line_by) {
+		this.proc = new DataProcessor(bar_by, bar_by_domain, block_by, line_by);
+		var d = this.proc.process(data);
+	
+		this.raw = data;
+		this.data = d['bars'];
+		this.info = d['info'];
+		this.fields=d['fields'];
+		this.block_by =d['block_by'];
+		this.block_by_idx=d['block_by_idx'];
+		this.bar_by = bar_by;
+	},
+	clear: function () {
+		$('div#'+this.id).empty();
+		this._clear();
+		this._init();
+		this.container = [];
+		this.cont_tail = 0;
+	}, 
+	reDraw: function () {
+		this.init();
+		this.draw();
+		
+		this.setEvents();
+		this.drawLabels();
+	
+		// focus on the graph
+		$('#'+this.id+'_svg').trigger('click');
+
+		this.makeController();
+	},
 	init: function () {
-		var base = this.base;
 		var data = this.data;
-		var conf = base.config;
+		var conf = this.config;
 
 		//var max_x = d3.max(data, function (d) {return d[0];});
 		var max_y = this.max_y = d3.max(data, function (d) {return d['count'];});
 		var max_line = d3.max(data, function (d) {return d['line_val'];});
 		this.max_unique = d3.max(data, function (d) {return d['unique'];});
 
-		//base.drawXAxis(max_x);
-		base.drawYAxis(max_y);
-		base.drawLineAxis(max_line);
-		base.drawGraph();
+		// inherited methods
+		//this.setupXAxis(max_x);
+		this.setupYAxis(max_y);
+		this.setupLineAxis(max_line);
+		this.setupGraph();
 
 		// domain in y axis is inverted relative to the chart
-		base.line_scale.domain([max_line, 0]);
+		this.line_scale.domain([max_line, 0]);
 		
 		// initialize colors
 		this._initBlockColor();
@@ -67,11 +88,10 @@ FootfallPlotter.prototype = {
 	},
 	makeController: function () {
 		var self = this;
-		var id = self.base.id;
-		var base = self.base;
-		var conf = base.config;
-		var div = $('#drawing_area');
-		var controls= "<div id="+id+"_controls><button class='show_unique'>Unique</button><button class='show_total'>Total</button>show line:<input type='checkbox' class='show_line' checked />show bar:<input type='checkbox' class='show_bar' checked />Average by: <select class='average'></select></div>";
+		var id = self.id;
+		var conf = this.config;
+		var div = $('#'+id);
+		var controls= "<div id="+id+"_controls><button class='show_unique'>Unique</button><button class='show_total'>Total</button>show line:<input type='checkbox' class='show_line' checked />show bar:<input type='checkbox' class='show_bar' checked />Average by: <select class='average'></select>Display by: <select class='aggr'></select></div>";
 
 		div.append(controls);
 
@@ -98,9 +118,8 @@ FootfallPlotter.prototype = {
 
 		// add time select
 		var avg_ops = "<option value='od' class='od'>Past One Day</option><option class='ow' value='ow'>Past One Week</option><option class='om' value='om'>Past One Month</option><option class='tm' value='tm'>Past Three Month</option><option class='oy' value='oy'>Past One Year</option>";
-		$(c_id + 'option[value=ow]').attr('selected', '');
 		$(c_id + 'select.average').append(avg_ops);
-		$(c_id + 'option[value='+conf.average_line_by+']').attr('selected', true);
+		$(c_id + 'select.average option[value='+conf.average_line_by+']').attr('selected', true);
 
 		$(c_id + 'select.average').change(function () {
 			var val = $(this).val();
@@ -109,42 +128,52 @@ FootfallPlotter.prototype = {
 		});
 
 
+		// aggregate by
+		var aggr_ops = "<option value='hour'>Hour</option><option value='day'>Day</option><option value='week'>Week</option><option value='month'>Month</option><option value='year'>Year</option>";
+		$(c_id + 'select.aggr').append(aggr_ops);
+		$(c_id + 'select.aggr option[value='+this.bar_by+']').attr('selected', true);
+
+		$(c_id + 'select.aggr').change(function () {
+			var val = $(this).val();
+			self.bar_by = val;
+			self.setData(self.raw, self.bar_by, ['hour', 'day'], 'sid', 'points');
+			self.clear();
+			self.reDraw();
+		});
+
 	},
 	_toggleBarView: function () {
 		var self = this;
-		var base = self.base;
-		var conf = base.config;
+		var conf = self.config;
 
 		if (conf.show_bar) {
-			self.base.svg.selectAll('.block').attr('opacity', 1);
+			self.svg.selectAll('.block').attr('opacity', 1);
 		} else {
-			self.base.svg.selectAll('.block').attr('opacity', 0);
+			self.svg.selectAll('.block').attr('opacity', 0);
 		}
 	},
 	_toggleLineView: function () {
 		var self = this;
-		var base = self.base;
-		var conf = base.config;
+		var conf = self.config;
 
 		if (conf.show_line) {
-			self.base.svg.selectAll('.line').attr('opacity', 1);
+			self.svg.selectAll('.line').attr('opacity', 1);
 		} else {
-			self.base.svg.selectAll('.line').attr('opacity', 0);
+			self.svg.selectAll('.line').attr('opacity', 0);
 		}
 	},
 	draw: function (type) {
 		var self = this;
-		var base = self.base;
-		var graph= base.graph;
+		var graph= self.graph;
 		var data = self.container;
-		var conf = base.config;
-		var g_bars= base.g_bars;
+		var conf = self.config;
+		var g_bars= self.g_bars;
 		
 
 		bars_data = g_bars.selectAll('g.bar').data(data, function (d) {return d['time'];});
 
 		bars = bars_data.enter().append('svg:g').attr('class', function (d) {return 'bar time_'+d['time'];})
-			.attr('transform', function (d, i) {return 'translate('+(base.cont_x+i*self.bar_width)+', 0)';});
+			.attr('transform', function (d, i) {return 'translate('+(self.cont_x+i*self.bar_width)+', 0)';});
 
 		// render the newly entered bars
 		
@@ -169,8 +198,7 @@ FootfallPlotter.prototype = {
 		this.drawAverageLine();
 	},
 	drawAverageLine: function () {
-		var base = this.base;
-		var conf = base.config;
+		var conf = this.config;
 		var data = this.data;
 		var range = this._getAverageRange(conf.average_line_by, data);
 		
@@ -184,10 +212,10 @@ FootfallPlotter.prototype = {
 		var bar_average = bar_sum/range.length;
 		
 		if (conf.show_bar) {
-			base.svg.select('.bar_average').remove();
+			this.svg.select('.bar_average').remove();
 			// draw average line for bars
-			var bar_average_height = conf.chart_height - base.y_scale(bar_average);
-        	base.graph.append('svg:line')
+			var bar_average_height = conf.chart_height - this.y_scale(bar_average);
+        	this.graph.append('svg:line')
 				.attr('class', 'block bar_average')
 				.attr('x1', 0)
 				.attr('y1', bar_average_height)
@@ -199,11 +227,11 @@ FootfallPlotter.prototype = {
 		if (conf.show_line) {
 			var line_sum = d3.sum(range, function (d) {return d.line_val;});
 			var line_average = line_sum/range.length;
-        	var line_pos = base.line_scale(line_average);
+        	var line_pos = this.line_scale(line_average);
 
-			base.svg.select('.line_average').remove();
+			this.svg.select('.line_average').remove();
         	// draw average line for lines
-        	base.graph.append('svg:line')
+        	this.graph.append('svg:line')
 				.attr('class', 'line line_average')
 				.attr('x1', 0)
 				.attr('y1', line_pos)
@@ -215,15 +243,14 @@ FootfallPlotter.prototype = {
     },
 	setEvents: function () {
 		var self = this;
-		var base = self.base;
 		var data = self.data;
-		var conf = base.config;
+		var conf = self.config;
 		var draggable_width = data.length*self.bar_width-conf.chart_width;
-		var svg_id = base.id+'_svg';
+		var svg_id = self.id+'_svg';
 
 		function updateContainer(cmd) {
 			if (cmd=='push') {
-				while ( this.container.length<=~~(this.base.config.chart_width* 3/this.bar_width)) {
+				while ( this.container.length<=~~(this.config.chart_width* 3/this.bar_width)) {
 					if (this.cont_tail !=this.data.length) {
 						this.container.push(this.data[this.cont_tail]);
 						this.cont_tail++;
@@ -233,7 +260,7 @@ FootfallPlotter.prototype = {
 			} else {
 				this.cont_tail--;
 
-				var idx=this.base.cont_x/this.bar_width;
+				var idx=this.cont_x/this.bar_width;
 				if (idx>=0)
 					this.container.unshift(data[idx]);
 				this.container.pop();
@@ -241,14 +268,13 @@ FootfallPlotter.prototype = {
 			this.draw();
 		}
 
-		base.setDrag(draggable_width, self.bar_width*self.data.length, self.bar_width, updateContainer, this);
-		base.setKeydown(self.bar_width*self.data.length, self.bar_width, 100, updateContainer, self._getNextSeparator, self._getPrevSeparator, this);
+		this.setupDrag(draggable_width, self.bar_width*self.data.length, self.bar_width, updateContainer, this);
+		this.setupKeydown(self.bar_width*self.data.length, self.bar_width, 100, updateContainer, self._getNextSeparator, self._getPrevSeparator, this);
 	},
 	setBarEvents: function () {
 		var self = this;
-		var base = self.base;
-		var conf = base.config;
-		var svg_id = base.id+'_svg';
+		var conf = self.config;
+		var svg_id = self.id+'_svg';
 		
 		// dblclick event, popup
 		function popup(bar) {
@@ -264,7 +290,7 @@ FootfallPlotter.prototype = {
 			else	
 				donut.value(function (d) {return d.entries.length;});
 		 
-			var popup_canvas = base.graph.append('svg:g').attr('class', 'popup').attr('time', bar.time).data([bar.blocks]);
+			var popup_canvas = self.graph.append('svg:g').attr('class', 'popup').attr('time', bar.time).data([bar.blocks]);
 	
 			var adjustment = 24;
 			popup_canvas.append('svg:rect')
@@ -319,9 +345,9 @@ FootfallPlotter.prototype = {
 		// popup event, dblclick
 		$('#'+svg_id+' g.bar').unbind('dblclick').bind('dblclick', function () {
 			// already existed
-			if (base.svg.select('.popup')[0][0]!=null) return;
+			if (self.svg.select('.popup')[0][0]!=null) return;
 	
-			if (!base.config.show_bar) return;
+			if (!self.config.show_bar) return;
 			var data = d3.select(this)[0][0].__data__;	
 			popup(data);
 		});
@@ -330,22 +356,21 @@ FootfallPlotter.prototype = {
 		function clickHandler(selected) {
 			var data = selected[0][0].__data__;
 			
-			base.svg.select('.selected_bar').classed('selected_bar', false);
+			self.svg.select('.selected_bar').classed('selected_bar', false);
 			selected.classed('selected_bar', true);
 
 			self.drawAverageLine(data);
 		}
-		base.setClick(clickHandler);
+		this.setupClick(clickHandler);
 	
 	},
 	drawLabels: function () {
 		var self = this;
-		var base = self.base;
-		var labels= base.labels;
+		var labels= self.labels;
 		var data = self.data;
-		var conf = base.config;
+		var conf = self.config;
 
-		base.drawLabels();
+		this.setupLabels();
 		labels.append('svg:line')
 			.attr('x1', conf.pad[3]).attr('y1', conf.pad[0]+conf.chart_height)
 			.attr('x2', conf.pad[3]+conf.chart_width).attr('y2', conf.pad[0]+conf.chart_height)
@@ -355,20 +380,16 @@ FootfallPlotter.prototype = {
 	},
 	drawLines: function (bars) {
 		var self = this;
-		var base = self.base;
-		var conf = base.config;
+		var conf = self.config;
 		var data=self.container;
-        
 		
-		
-		
-		var ps = bars[0].map(function (bar, i) {return [base.cont_x+i*self.bar_width+self.bar_width/2, base.line_scale(bar.__data__.line_val)];});
+		var ps = bars[0].map(function (bar, i) {return [self.cont_x+i*self.bar_width+self.bar_width/2, self.line_scale(bar.__data__.line_val)];});
         var line = d3.svg.line().interpolate('linear');
 
-		base.g_bars.select('path.line').remove();
+		self.g_bars.select('path.line').remove();
 		
 		// draw lines
-        base.g_bars.append('svg:path').data([ps]).attr('class', 'line')
+        self.g_bars.append('svg:path').data([ps]).attr('class', 'line')
         .attr('d', line)
         .attr('fill', 'none')
         .attr('stroke', 'DarkViolet')
@@ -379,8 +400,7 @@ FootfallPlotter.prototype = {
 	},
 	_renderBlocks: function (bars) {
 		var self=this;
-		var base = self.base;
-		var conf = base.config;
+		var conf = self.config;
 
 		// the block rects
 		var block_data = bars.selectAll('rect.block').data(function (d) {return d.blocks;});
@@ -393,31 +413,30 @@ FootfallPlotter.prototype = {
 			.attr('stroke-width', 0.5);
 
 		if (self.mode=='total') {
-			base.y_scale.domain([self.max_y, 0]);
-			base.svg.selectAll('rect.block').transition().duration(500)
+			self.y_scale.domain([self.max_y, 0]);
+			self.svg.selectAll('rect.block').transition().duration(500)
 				.attr('value', function (d) {return d.entries.length;})
-				.attr('height', function (d) {return conf.chart_height - base.y_scale(d.entries.length);})
-				.attr('y', function (d) {return conf.chart_height - base.y_scale(d.acc);})
+				.attr('height', function (d) {return conf.chart_height - self.y_scale(d.entries.length);})
+				.attr('y', function (d) {return conf.chart_height - self.y_scale(d.acc);})
 				.attr('fill', function (d) {
 					return self.blockColor(d.block_by);
 				});
-			base.svg.selectAll('rect.block').append('svg:title').text(function (d) {return d.block_by;});
+			self.svg.selectAll('rect.block').append('svg:title').text(function (d) {return d.block_by;});
 		} else {
 			// mode unique
-			base.y_scale.domain([self.max_unique, 0]);
-			base.svg.selectAll('rect.block').transition().duration(500)
+			self.y_scale.domain([self.max_unique, 0]);
+			self.svg.selectAll('rect.block').transition().duration(500)
 				.attr('value', function (d) {return d.bar_unique;})
-				.attr('height', function (d) {return conf.chart_height - base.y_scale(d.bar_unique);})
+				.attr('height', function (d) {return conf.chart_height - self.y_scale(d.bar_unique);})
 				.attr('y', 0)
-				.attr('fill', base.config.unique_color);
-			base.svg.selectAll('rect.block').selectAll('title').remove();
+				.attr('fill', self.config.unique_color);
+			self.svg.selectAll('rect.block').selectAll('title').remove();
 		}
-		base.svg.select('.y.axis').transition().duration(500).call(base.y_axis);
+		self.svg.select('.y.axis').transition().duration(500).call(self.y_axis);
 	},
 	_renderBarLabels: function (bars) {
 		var self=this;
-		var base = self.base;
-		var conf = base.config;
+		var conf = self.config;
 
 		// bar label
 		bars.append('svg:text')
@@ -434,24 +453,23 @@ FootfallPlotter.prototype = {
 			.attr('transform', 'scale(1, -1)');
 
 		if (self.mode=='total') {
-			base.svg.selectAll('text.bar_label').text(function (d) {return d['count'];})
+			self.svg.selectAll('text.bar_label').text(function (d) {return d['count'];})
 				.transition().duration(500)
-				.attr('dy', function (d) {return -(conf.chart_height - base.y_scale(d['count']))-10;})
+				.attr('dy', function (d) {return -(conf.chart_height - self.y_scale(d['count']))-10;})
 		} else {
-			base.svg.selectAll('text.bar_label').text(function (d) {return d['unique'];})
+			self.svg.selectAll('text.bar_label').text(function (d) {return d['unique'];})
 				.transition().duration(500)
-				.attr('dy', function (d) {return -(conf.chart_height - base.y_scale(d['unique']))-5;})
+				.attr('dy', function (d) {return -(conf.chart_height - self.y_scale(d['unique']))-5;})
 		}
 	},
 	_renderBarBackground: function (bars) {
 		var self=this;
-		var base = self.base;
-		var conf = base.config;
+		var conf = self.config;
 
 		// background
 		bars.append('svg:rect').attr('class', 'bar_background');
 
-		base.svg.selectAll('rect.bar_background')
+		self.svg.selectAll('rect.bar_background')
 			.attr('width', self.bar_width)
 			.attr('fill', 'blue')
 			.attr('stroke', 'white')
@@ -462,9 +480,8 @@ FootfallPlotter.prototype = {
 
 	_renderLegends: function () {
 		var self = this;
-		var base = self.base;
-		var conf = base.config;
-		var legend = base.labels.select('g.legend_region');
+		var conf = self.config;
+		var legend = self.labels.select('g.legend_region');
 
 		var levels = getValues(self.info[self.block_by]);
         var bw=10, bh=10, bmargin=10;
@@ -518,7 +535,7 @@ FootfallPlotter.prototype = {
 
 		// adjust legend position to middle
 		var total_height = lvl+4*2+50;
-		var margin_top = (base.svg_height- total_height) /2;
+		var margin_top = (self.svg_height- total_height) /2;
 		var margin_left = (conf.pad[1]-conf.pad[3])/6;
 
 		if (margin_top>0) {
@@ -544,11 +561,11 @@ FootfallPlotter.prototype = {
 		// 3 month, tm 
 		// 1 year, oy 
 		// default everything
-		var selected_bar = this.base.svg.select('g.selected_bar')[0][0];
+		var selected_bar = this.svg.select('g.selected_bar')[0][0];
 		if (selected_bar !=null) selected_bar = selected_bar.__data__;
 		else {
-			this.base.svg.select('g.bar').classed('selected_bar', true);
-			selected_bar = this.base.svg.select('g.bar')[0][0].__data__;
+			this.svg.select('g.bar').classed('selected_bar', true);
+			selected_bar = this.svg.select('g.bar')[0][0].__data__;
 		}
 		var container = [];
 		var upto = selected_bar==undefined ? ~~(new Date().getTime()/3600/1000): selected_bar.time, 
@@ -654,12 +671,11 @@ FootfallPlotter.prototype = {
     },
 	_renderCircles: function (bars) {
 		var self = this;
-		var base = self.base;
-		var conf = base.config;
+		var conf = self.config;
 		var data=self.container;
     
 		bars.append('svg:g').attr('class', 'line').attr('transform',function (d,i) {
-            return 'translate('+self.bar_width/2+','+base.line_scale(d.line_val)+')';
+            return 'translate('+self.bar_width/2+','+self.line_scale(d.line_val)+')';
         })
         .append('svg:circle') 
         .attr('r', 5)
