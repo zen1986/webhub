@@ -2,7 +2,8 @@
 // inherit from TreemapBase
 
 function TreemapPlotter() {
-	inherit(TreemapBase, this);
+	var base = new TreemapBase();
+	$.extend(this, base);
 }
 
 

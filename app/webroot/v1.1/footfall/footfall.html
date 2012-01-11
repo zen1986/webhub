@@ -9,7 +9,7 @@
         <script type="text/javascript" src="../include/d3/d3.js"></script>
         <script type="text/javascript" src="../include/d3/d3.layout.js"></script>
 		<script type="text/javascript" src="./footfall.js"></script>
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<script type="text/javascript" src="../../js/jquery.js"></script>
 		<link rel="stylesheet" href="../css/svg.css" type="text/css" media="screen" charset="utf-8">
 	</head>
 	<body>
@@ -31,8 +31,9 @@
 					average_line_by: 'ow',
 					unique_color: 'brown',
 				};
-				new FootfallPlotter(d, conf, 'sid', 'points');
+				plotter =new FootfallPlotter(d, conf, 'sid', 'points');
 			});
+			/*
 			d3.json('data/store.txt', function (d) {
 				var conf = {
 					pad: [80,380,80,80],
@@ -52,6 +53,7 @@
 				};
 				new FootfallPlotter(d, conf, 'aid', 'points');
 			});
+			*/
 
 		</script>
 	</body>

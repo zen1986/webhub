@@ -1,4 +1,3 @@
-
 // run test suit
 function runTest(suit, test_div) {
 	test_div.append('<h3>'+suit.title+'</h3>');
@@ -118,28 +117,3 @@ function getUniqueLength(entries) {
 	return uniq_arr.length;
 }
 
-function Composition(target, source) {
-	var desc = Object.getOwnPropertyDescriptor;
-	var prop = Object.getOwnPropertyNames;
-	var def_prop = Object.defineProperty;
-
-	prop(source).forEach(
-			function(key) {
-				def_prop(target, key, desc(source, key));
-			});
-	return target;
-}
-
-function inherit(src, to, args) {
-	var base = new src(args);
-	
-	// inherit properties
-	Composition(to, base);
-
-	// inherit methods
-	var proto =Object.getPrototypeOf(base);
-
-	for (var p in proto) {
-		to[p] = proto[p];
-	}
-}
