@@ -18,5 +18,9 @@ div#drawing_area {
 }
    
 .highlighted{
-	fill: red;
+	opacity: 0.5;
+}
+text.marker {
+	font-size: 10pt;
+	opacity: 0.8;
 }

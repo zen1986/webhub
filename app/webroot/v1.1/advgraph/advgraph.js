@@ -9,7 +9,7 @@ function AdvPlotter(d, conf) {
 
 	this.init()
 		.draw()
-		//.setEvents()
+		.setEvents()
 		.drawLabels();
 
 	// focus on the graph
@@ -30,7 +30,7 @@ AdvPlotter.prototype = {
 
 		// domain in y axis is inverted relative to the chart
 		this.y_scale.domain([0, max_y]);
-		this.y_scale.range([0, conf.chart_width]);
+		this.y_scale.range([0, conf.chart_width*0.9]);
 		this.y_axis.orient('top');
 		this.labels.select('.y.axis').attr('transform', 'translate('+conf.pad[3]+', '+(conf.pad[0])+')');
 
@@ -50,7 +50,7 @@ AdvPlotter.prototype = {
 
 		g_bars.attr('transform', 'rotate(-90) translate(-'+conf.chart_height+', 0)');
 
-		bars_data = g_bars.selectAll('g.bar').data(data, function (d) {return d[0]+'';});
+		bars_data = g_bars.selectAll('g.bar').data(data, function (d) {return[0]+'';});
 
 		bars=bars_data.enter().append('svg:g').attr('class', function (d) {return 'bar '+d[0];})
 				.attr('transform', function (d, i) {return 'translate('+(i*self.bar_width)+', 0)';});
@@ -77,14 +77,24 @@ AdvPlotter.prototype = {
 		var self = this,
 			data = self.data,
 			conf = self.config,
+			range = self.y_scale.range(),
+			max_r = Math.max(range[0], range[1]),
 			draggable_width = data.length*self.bar_width-conf.chart_width;
 
-		self.setupMarkerEvent(getY);
+		this.marker.select('line').attr('x2', conf.chart_height);
+		this.marker.select('text').attr('transform', 'scale(1, -1) rotate(-90) translate(0, '+(conf.chart_height+20)+') ');
+		this.marker.attr('transform', 'rotate(-90) translate(-'+conf.chart_height+', '+max_r/2+')');
+		self.setupMarkerEvent(callback, trans);
 
-		function getY() {
-			//console.log(this);
-			return conf.chart_height - self.y_scale(d3.select(this)[0][0].__data__[1]);
+		function callback() {
+			var val = d3.select(this)[0][0].__data__[1];
+			return [val, self.y_scale(val)];
 		}
+		// transform marker
+		function trans(y) {
+			this.marker.transition().delay(0).duration(500).attr('transform', 'rotate(-90) translate(-'+conf.chart_height+', '+y+')');
+		}
+
 		return this;
 	},
 	drawLabels: function () {

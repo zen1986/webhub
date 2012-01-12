@@ -57,7 +57,7 @@ FreqPlotter.prototype = {
 		bars.append('svg:rect')
 			.attr('width', self.bar_width/3)
 			.attr('x', self.bar_width-self.bar_width/3/2)
-			.attr('fill', 'blue')
+			.attr('fill', '#BABAB2')
 			.attr('height', function (d) {return conf.chart_height - self.y_scale(d[1]);});
 
 		
@@ -69,19 +69,20 @@ FreqPlotter.prototype = {
 		var self = this,
 			conf = self.config;
 
-		self.setupMarkerEvent(getY);
+		self.setupMarkerEvent(callback);
 
-		function getY() {
-			return conf.chart_height - self.y_scale(d3.select(this)[0][0].__data__[1]);
+		function callback() {
+			var val = d3.select(this)[0][0].__data__[1];
+			return [val, conf.chart_height - self.y_scale(val)];
 		}
 
 		return this;
 	},
 	drawLabels: function () {
-		var self = this,
+		var self  = this,
 			labels= self.labels,
-			data = self.data,
-			conf = self.config;
+			data  = self.data,
+			conf  = self.config;
 
 		self.setupLabels();
 		labels.append('svg:line')

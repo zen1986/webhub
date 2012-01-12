@@ -27,7 +27,7 @@ TreemapBase.prototype = {
 			svg_width = this.svg_width = conf.chart_width+conf.pad[3]+conf.pad[1],
 			svg_height= this.svg_height = conf.chart_height+conf.pad[0]+conf.pad[2];
 
-		this.color = d3.scale.ordinal().range(colors);
+		this.color = d3.scale.ordinal().range(colors.slice(10));
 
 		if ($('#drawing_area').length == 0)
 			$('body').prepend('<div id=\'drawing_area\'></div>');
@@ -38,6 +38,9 @@ TreemapBase.prototype = {
 		
 		this.div= d3.select("#drawing_area").append("div")
 			.style("position", "relative")
+			.style('width', (w+conf.label_width+10) + 'px')
+			.style('height', (h+1) + 'px')
+			.style('border', '1px solid black')
 			.attr('id', id+'_div')
 
 		this.canvas = this.div.append('div')

@@ -58,11 +58,11 @@ ChartBase.prototype = {
 
 		// put mask on canvas
 		// adjust the mask to include more space at top and bottom for labels
-		this.canvas.append('svg:clipPath').attr('id', 'canvas_mask').append('svg:rect')
+		this.canvas.append('svg:clipPath').attr('id', id+'_canvas_mask').append('svg:rect')
 			.attr('y', -adjustment/2)
 			.attr('width', conf.chart_width)
 			.attr('height', conf.chart_height+adjustment);
-		this.canvas.attr('clip-path', 'url(#canvas_mask)');
+		this.canvas.attr('clip-path', 'url(#'+id+'_canvas_mask)');
 
 		// the labels
 		this.labels = this.svg.append('svg:g').attr('class', 'labels');
@@ -109,8 +109,11 @@ ChartBase.prototype = {
 		this.marker.append('svg:line')
 			.attr('x1', 0).attr('y1', 0)
 			.attr('x2', conf.chart_width).attr('y2', 0)
-			.attr('stroke', 'red').attr('opacity', 0.4).attr('stroke-width', 1);
-		this.marker.append('svg:text').text('123.43').attr('transform', 'scale(1, -1) translate(10, -6)');
+			.attr('stroke', '#BABAB2').attr('stroke-width', 1);
+		this.marker.append('svg:text')
+			.attr('text-anchor', 'middle')
+			.attr('class', 'marker')
+			.attr('transform', 'scale(1, -1) translate(10, 0)');
 
 		return this;	
 	},
@@ -163,72 +166,66 @@ ChartBase.prototype = {
 		var self = this,
 			svgId ='#'+self.id+'_svg';
 
-		$(svgId).unbind("focus").bind("focus", function() {
-
-			// Setup animation
-			// Allow the arrow keys to change the displayed.
-			$(svgId).unbind("keydown").bind("keydown", function(e) {
-				// 0>= vp_x>=-draggable_width
-				var ret, dx, pre, next, old_vp=self.vp_x;
-				switch (e.keyCode) {
-					case 39: // right key 
-						dx = off;
-						if (typeof cbPrevPos== 'function') 
-							pre = cbPrevPos.call(ctx, self.vp_x);
-						else
-							pre = self.vp_x+dx;
-						self.vp_x= Math.min(self.draggable_width, pre);
-						break;
-					case 37: // left key 
-						dx = -off;
-						if (typeof cbNextPos== 'function') 
-							next = cbNextPos.call(ctx, self.vp_x);
-						else
-							next = self.vp_x+dx;
-						self.vp_x= Math.max(0, next);
-						break;
-					}
-				self.svg.select('g.bars').transition().duration(500).attr('transform', 'translate(-'+self.vp_x+', 0)');
-
-				if (typeof cbUpdate== 'function') {
-					ret=false;
-					while (!ret) {
-						ret = self._updateContainer(old_vp-self.vp_x, bars_width, bar_width, cbUpdate, ctx);
-					}
+		// Setup animation
+		// Allow the arrow keys to change the displayed.
+		$(svgId).unbind("keydown").bind("keydown", function(e) {
+			// 0>= vp_x>=-draggable_width
+			var ret, dx, pre, next, old_vp=self.vp_x;
+			switch (e.keyCode) {
+				case 39: // right key 
+					dx = off;
+					if (typeof cbPrevPos== 'function') 
+						pre = cbPrevPos.call(ctx, self.vp_x);
+					else
+						pre = self.vp_x+dx;
+					self.vp_x= Math.min(self.draggable_width, pre);
+					break;
+				case 37: // left key 
+					dx = -off;
+					if (typeof cbNextPos== 'function') 
+						next = cbNextPos.call(ctx, self.vp_x);
+					else
+						next = self.vp_x+dx;
+					self.vp_x= Math.max(0, next);
+					break;
 				}
-			});
+			self.svg.select('g.bars').transition().duration(500).attr('transform', 'translate(-'+self.vp_x+', 0)');
+			if (typeof cbUpdate== 'function') {
+				ret=false;
+				while (!ret) {
+					ret = self._updateContainer(old_vp-self.vp_x, bars_width, bar_width, cbUpdate, ctx);
+				}
+			}
 		});
 		$(svgId).unbind("click").bind("click", function () {$(this).focus();});
 		
 		return this;	
 	},
 	setupDrag: function (draggable_width, bars_width, bar_width, cbUpdate, ctx) {
-		var self = this;
+		var self = this, drag;
 
 		self.draggable_width = draggable_width;
 
-		this.svg.select('g.bars')
-			.call(d3.behavior.drag()
-				.on('drag', 
-					function (d) {
-						// move the bars
-						var old_vp = self.vp_x,
-							ret = false;
+		drag=d3.behavior.drag().on('drag', 
+				function (d) {
+					// move the bars
+					var old_vp = self.vp_x,
+						ret = false;
 
-						self.vp_x-= d3.event.dx;
-						self.vp_x=Math.max(self.vp_x,0);
-						self.vp_x=Math.min(self.draggable_width, self.vp_x);
+					self.vp_x-= d3.event.dx;
+					self.vp_x=Math.max(self.vp_x,0);
+					self.vp_x=Math.min(self.draggable_width, self.vp_x);
 
-						d3.select(this).attr('transform', 'translate(-'+self.vp_x+', 0)');
+					d3.select(this).attr('transform', 'translate(-'+self.vp_x+', 0)');
 
-						if (typeof cbUpdate=='function') {
-							while (!ret) {
-								ret = self._updateContainer(d3.event.dx, bars_width, bar_width, cbUpdate, ctx);
-							};
-						}
+					if (typeof cbUpdate=='function') {
+						while (!ret) {
+							ret = self._updateContainer(d3.event.dx, bars_width, bar_width, cbUpdate, ctx);
+						};
 					}
-				)
-			);
+				});
+
+		this.svg.select('g.bars').call(drag);
 		return this;	
 	},
 	setupClick: function (callback) {
@@ -241,16 +238,21 @@ ChartBase.prototype = {
 		});
 		return this;	
 	},
-	setupMarkerEvent: function (callback) {
+	setupMarkerEvent: function (callback, trans) {
 		var self = this,
-			id = this.id+'_svg';
+			id = this.id+'_svg',
+			domain = this.y_scale.domain(),
+			max = Math.max(domain[0], domain[1]);
 
-		$('#'+id+' g.bar').unbind('hover').bind('hover', function () {
+		this.marker.select('text').text(max.toFixed(0)+'');
+		$('#'+id+' g.bar').unbind('mouseenter').bind('mouseenter', function () {
 			if (!callback) return;
-			var y = callback.call(this);
-			self.svg.select('rect.highlighted').classed('highlighted', '').attr('fill', 'blue');
+			// return [y, val] pair
+			var ret = callback.call(this);
+			self.svg.select('rect.highlighted').classed('highlighted', '').attr('opacity', 1);
 			d3.select(this).selectAll('rect').classed('highlighted', true);
-			self.drawMarker(y);
+			self.drawMarker(ret, trans);
+			return false;
 		});
 		return this;	
 	},
@@ -311,12 +313,27 @@ ChartBase.prototype = {
 		}
 		return true;
 	},
-	drawMarker: function (y) {
-		this.marker.transition().delay(0).duration(500).attr('transform', 'translate(0, '+y+')');
-		var old = this.marker.select('text')[0][0].textContent;
+	drawMarker: function (pair, trans) {
+		var val=pair[0],
+			y  =pair[1],
+			old_val = this.marker.select('text')[0][0].textContent;
 
-		old = parseInt(old);
-		console.log(old);
+		old_val = parseInt(old_val);
+
+		if (trans)
+			trans.call(this,y);
+		else 
+			this.marker.transition().delay(0).duration(500).attr('transform', 'translate(0, '+y+')');
+
+		this.marker.select('text').transition().tween('text', tween);
+
+		function tween() {
+			var i = d3.interpolate(parseFloat(this.textContent), val);
+			return function (t) {
+				this.textContent = ''+i(t).toFixed(0);
+			}
+		}
+
 		return this;	
 	},
 }

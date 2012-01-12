@@ -41,19 +41,22 @@ TreemapPlotter.prototype = {
 		// put parent node onto bottom
 		$(div_id+ ' div.node').css('z-index', -1);
 
-		$(div_id+ ' div.cell')
+		$(div_id+ ' div.cell').unbind()
 			.mouseenter(function () {
 				$(this).css('z-index',  100);
 				$(this).animate({'width':'+=20', 'height':'+=20', 'left':'-=10', 'top':'-=10'}, 50);
+				return false;
 			})
 			.mouseleave(function () {
 				$(this).css('z-index', 0);
 				$(this).animate({'width':'-=20', 'height':'-=20', 'left':'+=10', 'top':'+=10'}, 50);
+				return false;
 			})
 			.click(function () {
 				var data = d3.select(this)[0][0].__data__,
 					info = 'Activity:'+data.name+'<br>Date:'+data.parent.name+'<br>Occurence:'+data.number;
 				d3.select('div.info').html(info);
+				return false;
 			});
 
 		return this;
@@ -79,7 +82,7 @@ TreemapPlotter.prototype = {
 			'left': '-140px',
 			'position': 'absolute',
 			'font-size': '2em',
-			'color': 'white',
+			'color': 'black',
 			'width': '500px',
 			'margin': '10px'
 		};

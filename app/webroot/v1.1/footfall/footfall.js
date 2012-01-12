@@ -49,9 +49,6 @@ FootfallPlotter.prototype = {
 			.setEvents()
 			.drawLabels()
 			.makeController();
-		// focus on the graph
-		$('#'+this.id+'_svg').trigger('click');
-
 		return this;
 	},
 	init: function () {
