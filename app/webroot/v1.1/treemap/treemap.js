@@ -31,33 +31,39 @@ TreemapPlotter.prototype = {
 				.style("height", function(d) { return d.dy - 1 + "px"; });
 		}
 
-		this.setEvents();
-		this.drawLabels();
+		this.setEvents()
+			.drawLabels();
 	},
 	setEvents: function () {
-		var id = this.id;
-		var div_id = '#'+id+'_div';
+		var id = this.id,
+			div_id = '#'+id+'_div';
 
 		// put parent node onto bottom
 		$(div_id+ ' div.node').css('z-index', -1);
 
-		$(div_id+ ' div.cell').mouseenter(function () {
-			$(this).css('z-index',  100);
-			$(this).animate({'width':'+=20', 'height':'+=20', 'left':'-=10', 'top':'-=10'}, 50);
-		}).mouseleave(function () {
-			$(this).css('z-index', 0);
-			$(this).animate({'width':'-=20', 'height':'-=20', 'left':'+=10', 'top':'+=10'}, 50);
-		}).click(function () {
-			var data = d3.select(this)[0][0].__data__;
-			var info = 'This is '+data.name+'. The time is '+data.parent.name;
-			d3.select('div.info').text(info);
-		});
+		$(div_id+ ' div.cell')
+			.mouseenter(function () {
+				$(this).css('z-index',  100);
+				$(this).animate({'width':'+=20', 'height':'+=20', 'left':'-=10', 'top':'-=10'}, 50);
+			})
+			.mouseleave(function () {
+				$(this).css('z-index', 0);
+				$(this).animate({'width':'-=20', 'height':'-=20', 'left':'+=10', 'top':'+=10'}, 50);
+			})
+			.click(function () {
+				var data = d3.select(this)[0][0].__data__,
+					info = 'Activity:'+data.name+'<br>Date:'+data.parent.name+'<br>Occurence:'+data.number;
+				d3.select('div.info').html(info);
+			});
+
+		return this;
 	},
 
 	drawLabels: function () {
-		var map;
-		var self = this;
-		var label_cont = this.labels.append('div').attr('class', 'legend');
+		var map, rows,
+			self = this,
+			label_cont = this.labels.append('div').attr('class', 'legend');
+
 		map = {
 			'top': '100px',
 			'position': 'absolute',
@@ -81,7 +87,7 @@ TreemapPlotter.prototype = {
 		$('div.title').css(map);
 
 		label_cont.append('text').text('legend').style('line-height', '2em').style('margin', '10px');
-		var rows = label_cont.selectAll('div.row').data(this.data['activities']).enter().append('div').attr('class', 'row');
+		rows = label_cont.selectAll('div.row').data(this.data['activities']).enter().append('div').attr('class', 'row');
 		map = {
 			'position': 'relative',
 			'margin-bottom': '10px',
@@ -110,6 +116,7 @@ TreemapPlotter.prototype = {
 		};
 		
 		$('div.info').css(map);
+		return this;
 	},
 }
 

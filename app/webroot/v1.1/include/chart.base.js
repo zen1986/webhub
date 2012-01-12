@@ -58,11 +58,11 @@ ChartBase.prototype = {
 
 		// put mask on canvas
 		// adjust the mask to include more space at top and bottom for labels
-		this.canvas.append('svg:clipPath').attr('id', id+'_canvas_mask').append('svg:rect')
+		this.canvas.append('svg:clipPath').attr('id', 'canvas_mask').append('svg:rect')
 			.attr('y', -adjustment/2)
 			.attr('width', conf.chart_width)
 			.attr('height', conf.chart_height+adjustment);
-		this.canvas.attr('clip-path', 'url(#'+id+'_canvas_mask)');
+		this.canvas.attr('clip-path', 'url(#canvas_mask)');
 
 		// the labels
 		this.labels = this.svg.append('svg:g').attr('class', 'labels');
@@ -105,10 +105,12 @@ ChartBase.prototype = {
 		this.g_bars = this.graph.append('svg:g').attr('class', 'bars');
 
 		// the marker
-		this.marker = this.graph.append('svg:line')
-			.attr('x1', 0).attr('y1', conf.chart_width)
-			.attr('x2', conf.chart_width).attr('y2', conf.chart_width)
+		this.marker = this.graph.append('svg:g').attr('class', 'marker').attr('transform', 'translate(0, '+conf.chart_height+')');
+		this.marker.append('svg:line')
+			.attr('x1', 0).attr('y1', 0)
+			.attr('x2', conf.chart_width).attr('y2', 0)
 			.attr('stroke', 'red').attr('opacity', 0.4).attr('stroke-width', 1);
+		this.marker.append('svg:text').text('123.43').attr('transform', 'scale(1, -1) translate(10, -6)');
 
 		return this;	
 	},
@@ -310,7 +312,11 @@ ChartBase.prototype = {
 		return true;
 	},
 	drawMarker: function (y) {
-		this.marker.transition().delay(0).duration(500).attr('y1', y).attr('y2', y);
+		this.marker.transition().delay(0).duration(500).attr('transform', 'translate(0, '+y+')');
+		var old = this.marker.select('text')[0][0].textContent;
+
+		old = parseInt(old);
+		console.log(old);
 		return this;	
 	},
 }

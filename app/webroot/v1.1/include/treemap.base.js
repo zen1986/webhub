@@ -8,10 +8,10 @@ function TreemapBase(conf) {
 		label_width: 200,
 		chart_title: "chart",
 	}
-	if (conf == undefined) 
-		this.config = config;
-	else
+	if (conf) 
 		this.config = conf;
+	else
+		this.config = config;
 
 	this.id = new Date().getTime();
 	this._init();
@@ -19,16 +19,15 @@ function TreemapBase(conf) {
 
 TreemapBase.prototype = {
 	_init: function () {
-		var conf = this.config;
-		var w = conf.chart_width, 
-			h = conf.chart_height;
-		this.color = d3.scale.ordinal().range(colors);
+		var conf = this.config,
+			w = conf.chart_width, 
+			h = conf.chart_height,
+			id = this.id,
+			conf = this.config,
+			svg_width = this.svg_width = conf.chart_width+conf.pad[3]+conf.pad[1],
+			svg_height= this.svg_height = conf.chart_height+conf.pad[0]+conf.pad[2];
 
-		var id = this.id;
-		var conf = this.config;
-		
-		var svg_width = this.svg_width = conf.chart_width+conf.pad[3]+conf.pad[1];
-		var svg_height= this.svg_height = conf.chart_height+conf.pad[0]+conf.pad[2];
+		this.color = d3.scale.ordinal().range(colors);
 
 		if ($('#drawing_area').length == 0)
 			$('body').prepend('<div id=\'drawing_area\'></div>');
@@ -55,5 +54,6 @@ TreemapBase.prototype = {
 			.style('background', 'white')
 			.style('width', conf.label_width + 'px')
 			.style('height', (1+h) + 'px')
+		return this;
 	},
 }

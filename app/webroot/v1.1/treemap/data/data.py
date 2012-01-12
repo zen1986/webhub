@@ -25,11 +25,11 @@ for i in range(31):
 	k=0
 	for a in data['activities']:
 		if a=='A':
-			act = r.random()*1000
+			act = int(r.random()*1000)
 		elif a=='B':
-			act = r.random()*250
+			act = int(r.random()*250)
 		elif a=='C':
-			act = r.random()*50
+			act = int(r.random()*50)
 
 		node['children'].append({'name':a, 'number': act})
 

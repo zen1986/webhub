@@ -1,0 +1,7 @@
+[
+	["/cakephp/app/webroot/v1.1/advgraph/img/1.jpg", 251], 
+	["/cakephp/app/webroot/v1.1/advgraph/img/2.jpg", 883],
+	["/cakephp/app/webroot/v1.1/advgraph/img/3.jpg", 234], 
+	["/cakephp/app/webroot/v1.1/advgraph/img/4.jpg", 392], 
+	["/cakephp/app/webroot/v1.1/advgraph/img/5.jpg", 220]
+]
