@@ -70,6 +70,8 @@ FootfallPlotter.prototype = {
 			// initialize colors
 			._initBlockColor();
 		
+		// remove marker line
+		this.marker.remove();
 		// domain in y axis is inverted relative to the chart
 		this.line_scale.domain([max_line, 0]);
 		// set bar width

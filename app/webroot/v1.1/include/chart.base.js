@@ -107,6 +107,7 @@ ChartBase.prototype = {
 		// the marker
 		this.marker = this.graph.append('svg:g').attr('class', 'marker').attr('transform', 'translate(0, '+conf.chart_height+')');
 		this.marker.append('svg:line')
+			.attr('class', 'marker')
 			.attr('x1', 0).attr('y1', 0)
 			.attr('x2', conf.chart_width).attr('y2', 0)
 			.attr('stroke', '#BABAB2').attr('stroke-width', 1);
