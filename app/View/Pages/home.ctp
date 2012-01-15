@@ -1,9 +1,6 @@
 
-<h1>曾强的主页/Zeng Qiang's Home Page</h1>
-
-
 <!--personal info-->
-<div class='section'>
+<div class='span-one-third'>
 	<h3>About Me</h3>
 	<dl>
 		<dt>Occupation:</dt>
@@ -17,7 +14,7 @@
 </div>
 
 <!--project related porfolio-->
-<div class='section'>
+<div class='span-one-third'>
 	<h3> Project Management </h3>
 	<div class='project'>
 		<dl>
@@ -30,7 +27,7 @@
 </div>
 
 <!--personal related -->
-<div class='section'>
+<div class='span-one-third'>
 <h3> My Item and Apps</h3>
 <ul>
 <li>
