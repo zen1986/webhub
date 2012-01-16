@@ -31,14 +31,16 @@
 		}
 		#drawing_area {
 		}
+		text {
+			font-size: 12pt;
+		}
 	</style>
 	<title>Graphs</title>
 </head>
 <body>
 	<script>
-			var tm_plotter= new TreemapPlotter();
 			d3.json("./treemap/data/treemap.txt", function(json) {
-				tm_plotter.draw(json);
+				var tm_plotter= new TreemapPlotter(json);
 			});
 	
 			d3.json('advgraph/data/adv.txt', function (d) {

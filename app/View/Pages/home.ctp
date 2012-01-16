@@ -37,6 +37,4 @@
 	<?php echo $this->Html->link("Photo", array("controller"=>"photos", "action"=>"index"));?>
 </li>
 </ul>
-
-<?php echo $this->Html->link("login", array("controller"=>"users", "action"=>"login"));?>
 </div>

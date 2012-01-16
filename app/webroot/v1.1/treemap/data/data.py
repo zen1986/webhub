@@ -8,9 +8,10 @@ def save(path):
 	f.close()
 
 class Node: 
-	def __init__(self, name, val):
+	def __init__(self, name, val, unique):
 		self.name = name
 		self.val = val
+		self.unique = unique
 		self.children = []
 
 	def addChild(self, n):
@@ -33,20 +34,20 @@ class Node:
 
 	def toObj(self):
 		if self.noChildren():
-			return {'name':self.name, 'value':self.val}
+			return {'name':self.name, 'value':self.val, 'unique':self.unique}
 		else:
-			return {'name':self.name, 'value':self.val, 'children':map(lambda c: c.toObj(), self.children), 'sum':self.getSum()}
+			return {'name':self.name, 'value':self.val, 'unique':self.unique, 'children':map(lambda c: c.toObj(), self.children), 'sum':self.getSum()}
 
 	def addLevel(self, arr):
 		for i in range(len(arr)):
-			self.addChild(Node(arr[i], r.randint(10, 100)))
+			self.addChild(Node(arr[i], int(r.random()**2 * 1000), r.randint(10, 100)))
 
-comps = ['seven-7', 'cheer']
-stores = ['s1','s2']
-acts = ['A', 'B', 'C']
+comps = ['seven-7', 'cheer', 'challenger', 'epicenter', 'starbucks', 'ssi mobiles']
+stores = ['south', 'north', 'east', 'west']
+acts = ['Grab and Win', 'Snap and Win', 'Scan and Win']
 
 # root
-root = Node('root', 0)
+root = Node('root', 0, 0)
 
 
 root.addLevel(comps)

@@ -30,18 +30,12 @@ TreemapBase.prototype = {
 			svg_width = this.svg_width = conf.chart_width+conf.pad[3]+conf.pad[1],
 			svg_height= this.svg_height = conf.chart_height+conf.pad[0]+conf.pad[2];
 
-		// color marks level 2 data
-		//this.color = d3.scale.ordinal().range(colors.slice(10));
-		// opacity marks level 1 data
-		this.opacity = d3.scale.ordinal().rangePoints([0.2,1]);
-
+		// get the drawing div
 		if ($('#drawing_area').length == 0)
 			$('body').prepend('<div id=\'drawing_area\'></div>');
 		
-		// treemap layout
-		this.treemap = d3.layout.treemap()
-			.size([w, h])
-			.sticky(true);
+		// treemap layout function
+		this.treemap = d3.layout.treemap().size([w, h]).sticky(true);
 		
 		// container div
 		this.div= d3.select("#drawing_area").append("div")
@@ -51,13 +45,13 @@ TreemapBase.prototype = {
 			.style('border', '1px solid black')
 			.attr('id', id+'_div');
 
-		// drawing div
+		// canvas div
 		this.canvas = this.div.append('svg:svg')
 			.attr('class', 'canvas')
 			.style("width", w + "px")
 			.style("height", h + "px");
 		
-		// labeling div
+		// label div
 		this.labels = this.div.append("div")
 			.style("position", "absolute")
 			.style('left', (1+w)+'px')
