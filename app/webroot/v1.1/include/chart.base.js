@@ -165,8 +165,8 @@ ChartBase.prototype = {
 	},
 	setupKeydown: function (bars_width, bar_width, off, cbUpdate, cbPrevPos, cbNextPos,  ctx) {
 		var self = this,
-			svgId ='#'+self.id+'_svg';
-
+			svgId ='#'+self.id+'_svg',
+			draggable_width = bars_width - self.config.chart_width;
 		// Setup animation
 		// Allow the arrow keys to change the displayed.
 		$(svgId).unbind("keydown").bind("keydown", function(e) {
@@ -179,7 +179,7 @@ ChartBase.prototype = {
 						pre = cbPrevPos.call(ctx, self.vp_x);
 					else
 						pre = self.vp_x+dx;
-					self.vp_x= Math.min(self.draggable_width, pre);
+					self.vp_x= Math.min(draggable_width, pre);
 					break;
 				case 37: // left key 
 					dx = -off;
@@ -202,10 +202,9 @@ ChartBase.prototype = {
 		
 		return this;	
 	},
-	setupDrag: function (draggable_width, bars_width, bar_width, cbUpdate, ctx) {
-		var self = this, drag;
-
-		self.draggable_width = draggable_width;
+	setupDrag: function (bars_width, bar_width, cbUpdate, ctx) {
+		var self = this, drag,
+			draggable_width = bars_width - self.config.chart_width;
 
 		drag=d3.behavior.drag().on('drag', 
 				function (d) {
@@ -215,7 +214,7 @@ ChartBase.prototype = {
 
 					self.vp_x-= d3.event.dx;
 					self.vp_x=Math.max(self.vp_x,0);
-					self.vp_x=Math.min(self.draggable_width, self.vp_x);
+					self.vp_x=Math.min(draggable_width, self.vp_x);
 
 					d3.select(this).attr('transform', 'translate(-'+self.vp_x+', 0)');
 
