@@ -1,2 +1,0 @@
-footfall
-- highlighted column will change when container changes
