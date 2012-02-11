@@ -24,8 +24,8 @@ if (isset($tags) && !empty($tags)) {
 	echo "<span><strong>Tag: </strong></span>";	
 	foreach ($tags as $tag) {
 		echo "<span class='tagname'>";
-		$tagname = $this->requestAction('/tags/tagName/'.$tag['tag_id']);
-		echo $this->Html->link($tagname['Tag']['tagname'], '/posts/posttag/'.$tag['tag_id']);
+		$tagname = $this->requestAction('/tags/tagName/'.$tag['cp_tag_id']);
+		echo $this->Html->link($tagname['Tag']['tagname'], '/posts/posttag/'.$tag['cp_tag_id']);
 		echo "</span> ";
 	}
 }

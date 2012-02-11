@@ -12,7 +12,7 @@
     <![endif]-->
 
     <!-- Le styles -->
-    <?php echo $this->Html->css("loggedin.css");?>
+    <?php echo $this->Html->css("blog.css");?>
     <?php echo $this->Html->css("common.css");?>
     <?php echo $this->Html->css("bootstrap.css");?>
     <style type="text/css">
@@ -82,9 +82,9 @@
         <div class="container">
 		  <?php echo $this->Html->link('Webhub', '/', array('class'=>'brand'));?>
           <ul class="nav">
-            <li class="active"><?php echo $this->Html->link('Home', '/');?></li>
-            <li><?php echo $this->Html->link('Blog', '/posts');?></li>
-            <li><?php echo $this->Html->link('Photo', '/photos');?></li>
+            <li<?php if ($this->params['controller']=="pages") echo " class=\"active\"";?>><?php echo $this->Html->link('Home', '/');?></li>
+            <li<?php if ($this->params['controller']=="posts") echo " class=\"active\"";?>><?php echo $this->Html->link('Blog', '/posts');?></li>
+            <li<?php if ($this->params['controller']=="photos") echo " class=\"active\"";?>><?php echo $this->Html->link('Photo', '/photos');?></li>
           </ul>
 <!--
           <form action="" class="pull-right">

@@ -1,7 +1,7 @@
 <?php
 
 class PostsController extends AppController {
-	var $layout = 'loggedin';
+	var $layout = 'blog';
 	var $uses = array('User', 'Post', 'Tag', 'Posttag');
 
 	public function beforeFilter() {
