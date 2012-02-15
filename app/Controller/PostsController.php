@@ -13,7 +13,21 @@ class PostsController extends AppController {
 		$id = $this->Session->read('Auth.User.id');
 		$posts = array();
 		if ($id!=null) {
-			$posts= $this->Post->find('all', array('order'=>'Post.created desc','conditions'=>array('user_id'=>$id)));
+            /*
+            $options['joins']=array(
+                array(
+                    'table'=>'cp_users', 
+                    'type'=>'inner',
+                    'conditions'=>array(
+                        'Post.cp_user_id = cp_users.id'
+                    )
+                )
+            ); 
+             */
+            $options['order'] = 'Post.created desc';
+            $options['conditions'] = array('Post.cp_user_id'=>$id);
+
+            $posts= $this->Post->find('all', $options);
 		} else {
 			$posts= $this->Post->find('all', array('order'=>'Post.created desc'));
 		}
@@ -22,7 +36,7 @@ class PostsController extends AppController {
 
 	public function create() {
 		if ($this->request->is('post')) {
-			$this->request->data['Post']['user_id'] = $this->Session->read('Auth.User.id');
+			$this->request->data['Post']['cp_user_id'] = $this->Session->read('Auth.User.id');
 			
 			
 			if ($this->Post->save($this->request->data)) {
@@ -44,7 +58,7 @@ class PostsController extends AppController {
 			$this->request->data = $this->Post->read();
 			$tags = array();
 			foreach ($this->request->data['Posttag'] as $posttag) {
-				$tag_id = $posttag['tag_id'];
+				$tag_id = $posttag['cp_tag_id'];
 				$tagname = $this->Tag->read('tagname', $tag_id);
 				array_push($tags, $tagname['Tag']['tagname']);
 			}
@@ -76,7 +90,7 @@ class PostsController extends AppController {
 			$this->Session->setFlash('Invalid tag name');
 			$this->redirect($this->referer());
 		} else {
-			$post_ids = $this->Posttag->find('all', array('conditions'=>array('tag_id'=>$tag_id)));
+			$post_ids = $this->Posttag->find('all', array('conditions'=>array('cp_tag_id'=>$tag_id)));
 			$posts=array();
 			foreach ($post_ids as $post_id) {
 				$post_id = $post_id['Posttag']['post_id'];
@@ -103,8 +117,8 @@ class PostsController extends AppController {
 					$this->Tag->save();
 					$tag_id=$this->Tag->id;
 				}
-				if ($this->Posttag->find('first', array('conditions'=>array('tag_id'=>$tag_id, 'post_id'=>$this->Post->id)))) continue;
-				$post_tag = array('Posttag'=>array('tag_id'=>$tag_id, 'post_id'=>$this->Post->id));
+				if ($this->Posttag->find('first', array('conditions'=>array('cp_tag_id'=>$tag_id, 'cp_post_id'=>$this->Post->id)))) continue;
+				$post_tag = array('Posttag'=>array('cp_tag_id'=>$tag_id, 'post_id'=>$this->Post->id));
 				$this->Posttag->create($post_tag);
 				$this->Posttag->save();
 			}

@@ -1,6 +1,6 @@
 <?php
 class UsersController extends AppController {
-	var $layout = 'loggedin';
+	var $layout = 'blog';
 
 	public function beforeFilter() {
 		$this->Auth->allow(array('logout'));

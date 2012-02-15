@@ -6,37 +6,31 @@
     <meta name="description" content="Zeng Qiang's webhub">
     <meta name="author" content="Zeng Qiang">
 
-    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
-    <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-
-    <!-- Le styles -->
-    <?php echo $this->Html->css("bootstrap.css");?>
+   <?php echo $this->Html->css("bootstrap.css");?>
     <style type="text/css">
       body {
         padding-top: 60px;
       }
     </style>
 
+   <?php echo $this->Html->css("bootstrap-responsive.css");?>
     <!-- Le fav and touch icons -->
-    <link rel="shortcut icon" href="images/favicon.ico">
-    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+    <link rel="shortcut icon" href="img/favicon.ico">
   </head>
 
   <body>
 
-    <div class="topbar">
-      <div class="fill">
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
         <div class="container">
 		  <?php echo $this->Html->link('Webhub', '/', array('class'=>'brand'));?>
-          <ul class="nav">
-            <li class="active"><?php echo $this->Html->link('Home', '/');?></li>
-            <li><?php echo $this->Html->link('Blog', '/posts');?></li>
-            <li><?php echo $this->Html->link('Photo', '/photos');?></li>
-          </ul>
+          <div id="nav-collapse">
+              <ul class="nav">
+                  <li<?php if ($this->params['controller']=="pages") echo " class=\"active\"";?>><?php echo $this->Html->link('Home', '/');?></li>
+                  <li<?php if ($this->params['controller']=="posts") echo " class=\"active\"";?>><?php echo $this->Html->link('Blog', '/posts');?></li>
+                  <li<?php if ($this->params['controller']=="photos") echo " class=\"active\"";?>><?php echo $this->Html->link('Photo', '/photos');?></li>
+              </ul>
+          </div>
         </div>
       </div>
     </div>
